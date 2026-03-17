@@ -1,19 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SpectraGuide — Autism Advocacy Platform</title>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone@7.23.5/babel.min.js"></script>
-    <style>
-      * { box-sizing: border-box; }
-      body { margin: 0; }
-    </style>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="text/babel" data-type="module" src="./spectraguide-launch.jsx"></script>
-  </body>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>SpectraGuide</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body style="margin:0">
+  <div id="root"></div>
+  <script type="text/babel">
+    ReactDOM.createRoot(document.getElementById('root')).render(
+      <h1 style={{color:'#4BBFAD', fontFamily:'Georgia', padding:'40px'}}>
+        🧩 SpectraGuide is loading...
+      </h1>
+    );
+  </script>
+</body>
 </html>
