@@ -387,7 +387,7 @@ function HomePage({ setActive, waitlist, setWaitlist, t }) {
 
 // ─── ADVOCATE CHAT ────────────────────────────────────────────────────────────
 function AdvocateChat({ user, chatHistory, setChatHistory, lang }) {
-  const [messages, setMessages] = useState(chatHistory.length ? chatHistory : [{ role:"assistant", content:lang==="es"?"¡Hola! Soy tu Defensor de SpectraGuide 💙 Estoy aquí para ayudarte con preguntas sobre autismo, IEPs, derechos, terapias y estrategias diarias. ¿Qué tienes en mente?":"Hi! I'm your SpectraGuide Advocate 💙 Powered by Claude Opus — Anthropic's most advanced model — so I can handle complex legal questions, nuanced IEP situations, and detailed therapy discussions.\n\nWhat's on your mind today?" }]);
+  const [messages, setMessages] = useState(chatHistory.length ? chatHistory : [{ role:"assistant", content:lang==="es"?"¡Hola! Soy tu Defensor de SpectraGuide 💙 Estoy aquí para ayudarte con preguntas sobre autismo, IEPs, derechos, terapias y estrategias diarias. ¿Qué tienes en mente?":"Hi! I'm your SpectraGuide Advocate 💙 Powered by AI — Anthropic's most advanced model — so I can handle complex legal questions, nuanced IEP situations, and detailed therapy discussions.\n\nWhat's on your mind today?" }]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [thinking, setThinking] = useState("");
@@ -409,7 +409,7 @@ function AdvocateChat({ user, chatHistory, setChatHistory, lang }) {
   const QUICK_EN = ["What are my rights in an IEP meeting?","Explain ABA therapy simply","What is FAPE?","How do I request an evaluation?","Sensory regulation strategies","Transition planning for teens","What is a 504 plan?","How do I dispute an IEP decision?"];
   const QUICK_ES = ["¿Cuáles son mis derechos en una reunión IEP?","Explica la terapia ABA","¿Qué es FAPE?","¿Cómo solicito una evaluación?","Estrategias de regulación sensorial","Planificación de transición para adolescentes"];
 
-  const SYSTEM_EN = `You are SpectraGuide, a warm, deeply compassionate, and highly expert autism advocate AI powered by Claude Opus. You help parents, educators, autistic individuals, and clinicians with:
+  const SYSTEM_EN = `You are SpectraGuide, a warm, deeply compassionate, and highly expert autism advocate AI powered by AI. You help parents, educators, autistic individuals, and clinicians with:
 - Special education law: IDEA, FAPE, LRE, Section 504, ADA, procedural safeguards, due process, IEE
 - IEP & BIP guidance: SMART goals, PLAAFP, services review, ESY, transition planning
 - Autism science & therapies: ABA, speech, OT, DIR/Floortime, ESDM, AAC, sensory processing
@@ -500,7 +500,7 @@ function IEPAnalyzer({ user, iepHistory, setIepHistory }) {
     if (!docText.trim()) return;
     setLoading(true); setAnalysis(null);
     try {
-      const result = await claudeJSONsafe(`You are SpectraGuide's expert IEP/BIP Analyzer powered by Claude Opus with deep knowledge of IDEA, FAPE, LRE, Section 504. Return a single JSON object (not an array):
+      const result = await claudeJSONsafe(`You are SpectraGuide's expert IEP/BIP Analyzer powered by AI with deep knowledge of IDEA, FAPE, LRE, Section 504. Return a single JSON object (not an array):
 {"documentType":"IEP or BIP","studentName":"name or null","studentAge":"age/grade or null","disability":"disability category or null","overallScore":1-10,"scoreRationale":"1-2 sentences","summary":"3-4 sentence plain-language summary","strengths":["..."],"gaps":["specific gap with why it matters"],"redFlags":["serious concern with IDEA citation if applicable"],"goalAnalysis":["assessment of each goal"],"servicesReview":["assessment of each service"],"parentRights":["specific right with explanation"],"recommendations":["specific actionable recommendation"],"questionsToAsk":["pointed question for school team"],"nextSteps":["prioritized action step"],"legalConcerns":["potential IDEA/FAPE/LRE violation or null array"]}`, `Analyze this document:\n\n${docText}`, 2500);
       setAnalysis(result);
       if (user) setIepHistory(h => [{ date:new Date().toLocaleDateString(), text:docText.slice(0,80)+"...", result }, ...h.slice(0,9)]);
@@ -558,7 +558,7 @@ function IEPAnalyzer({ user, iepHistory, setIepHistory }) {
           </div>
         </Card>
 
-        {loading && <Card style={{ textAlign:"center", padding:48 }}><div style={{ fontSize:36, marginBottom:12 }}>🧩</div><div style={{ fontWeight:700, fontSize:17, color:C.dark }}>Reading your document…</div><div style={{ color:C.mid, fontSize:13, marginTop:6 }}>Checking goals, services, rights, and potential gaps with Claude Opus.</div></Card>}
+        {loading && <Card style={{ textAlign:"center", padding:48 }}><div style={{ fontSize:36, marginBottom:12 }}>🧩</div><div style={{ fontWeight:700, fontSize:17, color:C.dark }}>Reading your document…</div><div style={{ color:C.mid, fontSize:13, marginTop:6 }}>Checking goals, services, rights, and potential gaps with AI.</div></Card>}
 
         {analysis && !analysis.error && (
           <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
@@ -656,7 +656,7 @@ function IEPAnalyzer({ user, iepHistory, setIepHistory }) {
 const ALL_RESOURCES = [
 
   // ── NATIONAL ─────────────────────────────────────────────────────────────
-  { name:"Autism Society of America", type:"Advocacy & Support", description:"Nation's leading autism organization with local chapters in every state. Support groups, advocacy, and family resources.", scope:"National", link:"https://autismsociety.org", phone:"1-800-328-8476", tips:"Find your local chapter at autismsociety.org/chapters for in-person support.", free:true, waitlist:null, tags:["advocacy","support groups","general","national"] },
+  { name:"Autism Society of America", type:"Advocacy & Support", description:"Nation's leading autism organization with local chapters in every state. Support groups, advocacy, and family resources.", scope:"National", link:"https://www.autismsociety.org", phone:"1-800-328-8476", tips:"Find your local chapter at autismsociety.org/chapters for in-person support.", free:true, waitlist:null, tags:["advocacy","support groups","general","national"] },
   { name:"Autism Speaks", type:"Research & Family Resources", description:"Free tool kits for every life stage, IEP guides, and a nationwide resource finder.", scope:"National", link:"https://autismspeaks.org", phone:"1-888-288-4762", tips:"Download their free IEP guide under 'Family Services > School & Learning'.", free:true, waitlist:null, tags:["iep","resources","advocacy","national"] },
   { name:"ASAN — Autistic Self Advocacy Network", type:"Autistic-Led Advocacy", description:"Run by and for autistic people. Neurodiversity-affirming resources, policy guides, and community connections.", scope:"National", link:"https://autisticadvocacy.org", phone:null, tips:"Their 'Welcome to the Autistic Community' guide is essential for newly diagnosed adults.", free:true, waitlist:null, tags:["advocacy","autistic adults","self-advocacy","national"] },
   { name:"Wrightslaw Special Education Law", type:"Legal Resources", description:"The most trusted source for special education law — IDEA, parent rights, and attorney directories.", scope:"National", link:"https://wrightslaw.com", phone:null, tips:"Use Yellow Pages for Kids at yellowpagesforkids.com to find advocates in your state.", free:true, waitlist:null, tags:["legal","iep","rights","law","due process","national"] },
@@ -686,7 +686,7 @@ const ALL_RESOURCES = [
   { name:"Circle City ABA — Kokomo", type:"ABA Therapy", description:"Play-based ABA therapy for children 18 months–17 years. Individualized programs, social skills groups, and parent training. One of Indiana's leading ABA providers with 20+ years experience.", scope:"Local", link:"https://circlecityaba.com/kokomo-in/", phone:"765-237-9935", tips:"Located at 2330 S Dixon Road, Suite 350. Accepts most insurance, Medicaid, and Tricare.", free:false, waitlist:"4-8 weeks", tags:["kokomo","indiana","aba","behavior","therapy","local"] },
   { name:"Indiana Behavior Analysis Academy (IBAA)", type:"ABA Therapy & Diagnosis", description:"Kokomo-based ABA therapy provider founded in 2014. Offers individualized ABA therapy, diagnostic evaluations with licensed psychologist Dr. Melody Marley, and an Early Learning Center for ages 2-6.", scope:"Local", link:"https://indianabaa.com", phone:"765-419-0411", tips:"Located at 1315 E Hoffer St. IBAA offers both diagnosis and ABA therapy — helpful for families just starting out.", free:false, waitlist:"3-6 weeks", tags:["kokomo","indiana","aba","behavior","diagnosis","early intervention","local"] },
   { name:"Ivy Rehab for Kids — Kokomo", type:"Speech, OT & Physical Therapy", description:"Pediatric physical, occupational, and speech therapy at two Kokomo locations. Specializes in sensory processing, fine motor, social skills, speech, and feeding therapy for children birth–adulthood.", scope:"Local", link:"https://ivyrehab.com/physical-therapy-location/kokomo-in-kids/", phone:"765-436-0052", tips:"Located at 2108 E Blvd (next to TJ Maxx) and 1805 E Hoffer St. Open Mon–Fri 7:30am–7pm, Sat 8am–12pm.", free:false, waitlist:"2-4 weeks", tags:["kokomo","indiana","speech therapy","occupational therapy","physical therapy","ot","sensory","local"] },
-  { name:"Hopebridge Autism Therapy Center — Indiana", type:"ABA Therapy", description:"Multi-location ABA therapy provider across Indiana offering comprehensive autism therapy for children. Accepts most major insurance plans.", scope:"Local", link:"https://hopebridge.com", phone:"844-467-3224", tips:"Hopebridge has multiple Indiana locations — call to find the nearest center to Kokomo and ask about current openings.", free:false, waitlist:"4-8 weeks", tags:["kokomo","indiana","aba","behavior","therapy","local"] },
+  { name:"Hopebridge Autism Therapy Center — Indiana", type:"ABA Therapy", description:"Multi-location ABA therapy provider across Indiana offering comprehensive autism therapy for children. Accepts most major insurance plans.", scope:"Local", link:"https://www.hopebridge.com", phone:"844-467-3224", tips:"Hopebridge has multiple Indiana locations — call to find the nearest center to Kokomo and ask about current openings.", free:false, waitlist:"4-8 weeks", tags:["kokomo","indiana","aba","behavior","therapy","local"] },
   { name:"Community Howard Regional Health", type:"Healthcare & Behavioral Health", description:"Howard County's regional hospital offering behavioral health, developmental pediatrics, and care coordination. A key entry point for autism evaluation and local service referrals in Kokomo.", scope:"Local", link:"https://www.communityhoward.org", phone:"765-453-8383", tips:"Ask specifically about developmental pediatrics for autism evaluations and a warm handoff to local therapy providers.", free:false, waitlist:null, tags:["kokomo","indiana","healthcare","diagnosis","behavioral health","local"] },
   { name:"Howard County School Corp — Special Education", type:"School & IEP Services", description:"Kokomo-area public school special education department serving students with autism. Your first contact for school-based IEP evaluations and services.", scope:"Local", link:"https://www.kokomo.k12.in.us", phone:"765-455-8000", tips:"Contact the Special Education Director directly to request an initial evaluation or call an IEP meeting.", free:true, waitlist:null, tags:["kokomo","indiana","school","iep","special education","local"] },
 
@@ -824,9 +824,9 @@ function ResourceFinder({ user, savedResources, setSavedResources, lang }) {
     { name:"BACB Registry",           desc:"Find Board Certified Behavior Analysts (BCBAs) verified anywhere in the US.",        icon:"🔬", color:C.peach,    url:"https://www.bacb.com/services/o.php?page=101143" },
     { name:"AOTA OT Locator",         desc:"Find occupational therapists specializing in autism & sensory processing near you.", icon:"🖐️", color:C.sky,     url:"https://www.aota.org/practice/find-ot" },
     { name:"Easter Seals Centers",    desc:"ABA, speech & OT locations nationwide. Accepts Medicaid & most insurance.",          icon:"🌼", color:C.gold,     url:"https://www.easterseals.com/our-programs/autism-services/" },
-    { name:"Autism Society Chapters", desc:"Find your local chapter for support groups, events & community resources.",          icon:"🤝", color:C.rose,     url:"https://autismsociety.org/chapters/" },
+    { name:"Autism Society Chapters", desc:"Find your local chapter for support groups, events & community resources.",          icon:"🤝", color:C.rose,     url:"https://www.autismsociety.org/chapters/" },
     { name:"Google Maps Search",      desc:"Real-time map search for autism providers in your exact city — always up to date.",   icon:"📍", color:C.teal,    url:"https://www.google.com/maps/search/autism+therapy+near+me" },
-    { name:"Hopebridge Locations",    desc:"One of the largest ABA therapy networks in the US — find a center near you.",        icon:"🌈", color:C.lavender, url:"https://hopebridge.com/locations/" },
+    { name:"Hopebridge Locations",    desc:"One of the largest ABA therapy networks in the US — find a center near you.",        icon:"🌈", color:C.lavender, url:"https://www.hopebridge.com/locations/" },
     { name:"SAMHSA Treatment Locator",desc:"Government-verified behavioral health providers. Covers all 50 states.",             icon:"🏥", color:C.peach,    url:"https://findtreatment.samhsa.gov/" },
     { name:"Autism Navigator",        desc:"State-by-state autism resource guides with local service maps.",                     icon:"🧭", color:C.sky,      url:"https://autismnavigator.com/" },
     { name:"Autism Speaks Resource Guide", desc:"Searchable national resource database with local provider finder by zip.",     icon:"💙", color:C.rose,     url:"https://www.autismspeaks.org/resource-guide" },
@@ -1052,7 +1052,7 @@ function BlogHub() {
         <div style={{ display:"flex", gap:12, fontSize:12, color:C.soft, marginBottom:28 }}>
           <span>✍️ {selected.author}</span><span>⏱ {selected.readTime}</span>
         </div>
-        {postLoading ? <Card style={{ padding:48, textAlign:"center" }}><div style={{ fontSize:30, marginBottom:10 }}>📖</div><div style={{ fontWeight:700, color:C.dark }}>Writing article with Claude Opus…</div></Card>
+        {postLoading ? <Card style={{ padding:48, textAlign:"center" }}><div style={{ fontSize:30, marginBottom:10 }}>📖</div><div style={{ fontWeight:700, color:C.dark }}>Writing article with AI…</div></Card>
           : <Card><div style={{ fontSize:15, lineHeight:1.88, color:C.mid, whiteSpace:"pre-wrap" }}>{selected.content}</div></Card>}
       </div>
     </div>
@@ -1142,7 +1142,7 @@ function PricingPage({ setActive }) {
               { q:"Is my data private and secure?", a:"Yes. All data is encrypted. IEP documents are analyzed in real-time and never stored unless you explicitly save them to your account." },
               { q:"Can I use SpectraGuide for multiple children?", a:"The Family plan supports unlimited family members. Professional and District plans include multi-student management tools." },
               { q:"Is this a substitute for legal advice?", a:"No. SpectraGuide provides educational guidance. For legal disputes, always consult a qualified special education attorney." },
-              { q:"How accurate is the IEP Analyzer?", a:"It's powered by Claude Opus and trained on IDEA law and thousands of IEPs. It's highly effective at identifying patterns, rights, and gaps." },
+              { q:"How accurate is the IEP Analyzer?", a:"It's powered by AI and trained on IDEA law and thousands of IEPs. It's highly effective at identifying patterns, rights, and gaps." },
             ].map((faq,i) => (
               <Card key={i}>
                 <div style={{ fontWeight:700, fontSize:13, color:C.dark, marginBottom:7 }}>❓ {faq.q}</div>
@@ -1534,7 +1534,7 @@ function PartnerPage({ setActive }) {
 // ─── PRESS KIT ────────────────────────────────────────────────────────────────
 function PressKit() {
   const w = useWindowWidth(); const mobile = w<768;
-  const stats = [{ n:"50,000+", l:"Families on Platform" },{ n:"12,000+", l:"IEPs Analyzed" },{ n:"80+", l:"Countries Served" },{ n:"98%", l:"User Satisfaction" },{ n:"$0", l:"Paid User Acquisition" },{ n:"Claude Opus", l:"AI Model Powering SpectraGuide" }];
+  const stats = [{ n:"50,000+", l:"Families on Platform" },{ n:"12,000+", l:"IEPs Analyzed" },{ n:"80+", l:"Countries Served" },{ n:"98%", l:"User Satisfaction" },{ n:"$0", l:"Paid User Acquisition" },{ n:"AI Powered", l:"AI Model Powering SpectraGuide" }];
   const facts = ["1 in 36 children in the US is diagnosed with autism spectrum disorder (CDC, 2023)","The average special education attorney costs $5,000–$15,000 per dispute","70% of autism families report difficulty finding quality local resources","SpectraGuide is the only AI-native, all-in-one autism advocacy platform on the market","Founded to democratize access to special education advocacy, regardless of income"];
   const coverage = [{ outlet:"TechCrunch", headline:"SpectraGuide Is Using AI to Level the Playing Field for Autism Families", date:"Jan 2025" },{ outlet:"Wired", headline:"The AI That's Helping Parents Fight Back Against Broken IEPs", date:"Feb 2025" },{ outlet:"EdSurge", headline:"SpectraGuide: A New Tool That Decodes Special Education Law for Families", date:"Mar 2025" }];
 
@@ -1719,7 +1719,7 @@ function Footer({ setActive, t }) {
           {[{ title:"Platform", links:[["Chat","Chat"],["IEP Analyzer","IEP"],["Resources","Resources"],["Learning Hub","Blog"]] },
             { title:"Company", links:[["About","About"],["Pricing","Pricing"],["Press Kit","Press"],["Partner","Partner"]] },
             { title:"Get Help", links:[["Book a Demo","Booking"],["Advocate Chat","Chat"],["Resource Finder","Resources"]] },
-            { title:"Legal", links:[["Privacy Policy","Privacy"],["Terms of Service","Terms"],["FERPA Compliance","About"]] }
+            { title:"Legal", links:[["Privacy Policy","Privacy"],["Terms of Service","Terms"],["FERPA Compliance","FERPA"]] }
           ].map(col => (
             <div key={col.title}>
               <div style={{ fontSize:10, fontWeight:700, color:"rgba(255,255,255,0.35)", letterSpacing:"0.1em", marginBottom:12, textTransform:"uppercase" }}>{col.title}</div>
@@ -1728,6 +1728,8 @@ function Footer({ setActive, t }) {
                   ? <a key={label} href="https://www.iubenda.com/privacy-policy/3224602" target="_blank" rel="noopener noreferrer" style={{ fontSize:12, color:"rgba(255,255,255,0.5)", marginBottom:8, cursor:"pointer", display:"block", textDecoration:"none" }}>{label}</a>
                   : tab === "Terms"
                   ? <a key={label} href="https://www.iubenda.com/terms-and-conditions/3224602" target="_blank" rel="noopener noreferrer" style={{ fontSize:12, color:"rgba(255,255,255,0.5)", marginBottom:8, cursor:"pointer", display:"block", textDecoration:"none" }}>{label}</a>
+                  : tab === "FERPA"
+                  ? <a key={label} href="https://studentprivacy.ed.gov/ferpa" target="_blank" rel="noopener noreferrer" style={{ fontSize:12, color:"rgba(255,255,255,0.5)", marginBottom:8, cursor:"pointer", display:"block", textDecoration:"none" }}>{label}</a>
                   : <div key={label} onClick={()=>setActive(tab)} style={{ fontSize:12, color:"rgba(255,255,255,0.5)", marginBottom:8, cursor:"pointer" }}>{label}</div>
               ))}
             </div>
@@ -1737,7 +1739,7 @@ function Footer({ setActive, t }) {
           <div style={{ fontSize:11, color:"rgba(255,255,255,0.3)" }}>© 2026 SpectraGuide. Made with 💙 for the autism community.</div>
           <div style={{ display:"flex", alignItems:"center", gap:7 }}>
             <span style={{ fontSize:10, color:"rgba(255,255,255,0.22)" }}>{t.poweredBy}</span>
-            <span style={{ background:`linear-gradient(135deg,${C.teal},${C.lavender})`, color:"white", fontSize:9, fontWeight:700, padding:"2px 9px", borderRadius:999 }}>Claude Opus</span>
+            <span style={{ background:`linear-gradient(135deg,${C.teal},${C.lavender})`, color:"white", fontSize:9, fontWeight:700, padding:"2px 9px", borderRadius:999 }}>AI Powered</span>
           </div>
           <div style={{ fontSize:11, color:"rgba(255,255,255,0.3)" }}>Not a substitute for legal or medical advice.</div>
         </div>
