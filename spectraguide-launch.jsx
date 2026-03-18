@@ -656,7 +656,7 @@ function IEPAnalyzer({ user, iepHistory, setIepHistory }) {
 const ALL_RESOURCES = [
 
   // ── NATIONAL ─────────────────────────────────────────────────────────────
-  { name:"Autism Society of America", type:"Advocacy & Support", description:"Nation's leading autism organization with local chapters in every state. Support groups, advocacy, and family resources.", scope:"National", link:"https://www.autismsociety.org", phone:"1-800-328-8476", tips:"Find your local chapter at autismsociety.org/chapters for in-person support.", free:true, waitlist:null, tags:["advocacy","support groups","general","national"] },
+  { name:"Autism Society of America", type:"Advocacy & Support", description:"Nation's leading autism organization with local chapters in every state. Support groups, advocacy, and family resources.", scope:"National", link:"https://autismsociety.org", phone:"1-800-328-8476", tips:"Find your local chapter at autismsociety.org/chapters for in-person support.", free:true, waitlist:null, tags:["advocacy","support groups","general","national"] },
   { name:"Autism Speaks", type:"Research & Family Resources", description:"Free tool kits for every life stage, IEP guides, and a nationwide resource finder.", scope:"National", link:"https://autismspeaks.org", phone:"1-888-288-4762", tips:"Download their free IEP guide under 'Family Services > School & Learning'.", free:true, waitlist:null, tags:["iep","resources","advocacy","national"] },
   { name:"ASAN — Autistic Self Advocacy Network", type:"Autistic-Led Advocacy", description:"Run by and for autistic people. Neurodiversity-affirming resources, policy guides, and community connections.", scope:"National", link:"https://autisticadvocacy.org", phone:null, tips:"Their 'Welcome to the Autistic Community' guide is essential for newly diagnosed adults.", free:true, waitlist:null, tags:["advocacy","autistic adults","self-advocacy","national"] },
   { name:"Wrightslaw Special Education Law", type:"Legal Resources", description:"The most trusted source for special education law — IDEA, parent rights, and attorney directories.", scope:"National", link:"https://wrightslaw.com", phone:null, tips:"Use Yellow Pages for Kids at yellowpagesforkids.com to find advocates in your state.", free:true, waitlist:null, tags:["legal","iep","rights","law","due process","national"] },
@@ -824,7 +824,7 @@ function ResourceFinder({ user, savedResources, setSavedResources, lang }) {
     { name:"BACB Registry",           desc:"Find Board Certified Behavior Analysts (BCBAs) verified anywhere in the US.",        icon:"🔬", color:C.peach,    url:"https://www.bacb.com/services/o.php?page=101143" },
     { name:"AOTA OT Locator",         desc:"Find occupational therapists specializing in autism & sensory processing near you.", icon:"🖐️", color:C.sky,     url:"https://www.aota.org/practice/find-ot" },
     { name:"Easter Seals Centers",    desc:"ABA, speech & OT locations nationwide. Accepts Medicaid & most insurance.",          icon:"🌼", color:C.gold,     url:"https://www.easterseals.com/our-programs/autism-services/" },
-    { name:"Autism Society Chapters", desc:"Find your local chapter for support groups, events & community resources.",          icon:"🤝", color:C.rose,     url:"https://www.autismsociety.org/chapters/" },
+    { name:"Autism Society Chapters", desc:"Find your local chapter for support groups, events & community resources.",          icon:"🤝", color:C.rose,     url:"https://autismsociety.org/chapters/" },
     { name:"Google Maps Search",      desc:"Real-time map search for autism providers in your exact city — always up to date.",   icon:"📍", color:C.teal,    url:"https://www.google.com/maps/search/autism+therapy+near+me" },
     { name:"Hopebridge Locations",    desc:"One of the largest ABA therapy networks in the US — find a center near you.",        icon:"🌈", color:C.lavender, url:"https://www.hopebridge.com/locations/" },
     { name:"SAMHSA Treatment Locator",desc:"Government-verified behavioral health providers. Covers all 50 states.",             icon:"🏥", color:C.peach,    url:"https://findtreatment.samhsa.gov/" },
@@ -1692,8 +1692,8 @@ function AboutPage({ setActive }) {
 
         {/* LEGAL LINKS */}
         <div style={{ textAlign:"center", marginTop:32, display:"flex", gap:20, justifyContent:"center", flexWrap:"wrap" }}>
-          <a href="https://www.iubenda.com/privacy-policy/3224602" target="_blank" rel="noopener noreferrer" style={{ fontSize:12, color:C.soft, textDecoration:"none", borderBottom:`1px solid ${C.border}` }}>Privacy Policy</a>
-          <a href="https://www.iubenda.com/terms-and-conditions/3224602" target="_blank" rel="noopener noreferrer" style={{ fontSize:12, color:C.soft, textDecoration:"none", borderBottom:`1px solid ${C.border}` }}>Terms of Service</a>
+          <a href="#" onClick={(e)=>{e.preventDefault();setActive&&setActive("Privacy");}} target="_blank" rel="noopener noreferrer" style={{ fontSize:12, color:C.soft, textDecoration:"none", borderBottom:`1px solid ${C.border}` }}>Privacy Policy</a>
+          <a href="#" onClick={(e)=>{e.preventDefault();setActive&&setActive("Privacy");}} target="_blank" rel="noopener noreferrer" style={{ fontSize:12, color:C.soft, textDecoration:"none", borderBottom:`1px solid ${C.border}` }}>Terms of Service</a>
           <span style={{ fontSize:12, color:C.soft }}>© 2026 SpectraGuide · Made with 💙 in Kokomo, Indiana</span>
         </div>
 
@@ -1725,9 +1725,9 @@ function Footer({ setActive, t }) {
               <div style={{ fontSize:10, fontWeight:700, color:"rgba(255,255,255,0.35)", letterSpacing:"0.1em", marginBottom:12, textTransform:"uppercase" }}>{col.title}</div>
               {col.links.map(([label,tab]) => (
                 tab === "Privacy" 
-                  ? <a key={label} href="https://www.iubenda.com/privacy-policy/3224602" target="_blank" rel="noopener noreferrer" style={{ fontSize:12, color:"rgba(255,255,255,0.5)", marginBottom:8, cursor:"pointer", display:"block", textDecoration:"none" }}>{label}</a>
+                  ? <div key={label} onClick={()=>setActive("Privacy")} style={{ fontSize:12, color:"rgba(255,255,255,0.5)", marginBottom:8, cursor:"pointer" }}>{label}</div>
                   : tab === "Terms"
-                  ? <a key={label} href="https://www.iubenda.com/terms-and-conditions/3224602" target="_blank" rel="noopener noreferrer" style={{ fontSize:12, color:"rgba(255,255,255,0.5)", marginBottom:8, cursor:"pointer", display:"block", textDecoration:"none" }}>{label}</a>
+                  ? <div key={label} onClick={()=>setActive("Terms")} style={{ fontSize:12, color:"rgba(255,255,255,0.5)", marginBottom:8, cursor:"pointer" }}>{label}</div>
                   : tab === "FERPA"
                   ? <a key={label} href="https://studentprivacy.ed.gov/ferpa" target="_blank" rel="noopener noreferrer" style={{ fontSize:12, color:"rgba(255,255,255,0.5)", marginBottom:8, cursor:"pointer", display:"block", textDecoration:"none" }}>{label}</a>
                   : <div key={label} onClick={()=>setActive(tab)} style={{ fontSize:12, color:"rgba(255,255,255,0.5)", marginBottom:8, cursor:"pointer" }}>{label}</div>
@@ -1745,6 +1745,68 @@ function Footer({ setActive, t }) {
         </div>
       </div>
     </footer>
+  );
+}
+
+// ─── PRIVACY POLICY PAGE ─────────────────────────────────────────────────────
+function PrivacyPage({ setActive }) {
+  const w = useWindowWidth(); const mobile = w<768;
+  return (
+    <div style={{ paddingTop:80, minHeight:"100vh", background:C.cream, padding:"80px 20px 60px" }}>
+      <div style={{ maxWidth:800, margin:"0 auto" }}>
+        <Pill color={C.teal}>LEGAL</Pill>
+        <h1 style={{ fontFamily:serif, fontSize:mobile?26:34, fontWeight:900, color:C.dark, margin:"16px 0 8px" }}>Privacy Policy</h1>
+        <p style={{ color:C.soft, fontSize:13, marginBottom:32 }}>Last updated: March 18, 2026</p>
+        {[
+          ["1. Information We Collect", "We collect information you provide directly to us, including your name and email address when you create an account or join our waitlist. We also collect information about how you use SpectraGuide, including IEP documents you choose to analyze, chat messages you send to our AI Advocate, and resources you save. We use cookies and similar technologies to improve your experience."],
+          ["2. How We Use Your Information", "We use the information we collect to provide, maintain, and improve our services, process your requests and transactions, send you technical notices and support messages, and respond to your comments and questions. We do not sell your personal information to third parties."],
+          ["3. IEP Documents & Sensitive Information", "Any IEP, BIP, or educational documents you submit for analysis are used solely to provide you with the requested analysis. We do not permanently store IEP document content beyond your current session unless you explicitly save it to your dashboard. We treat all educational documents with the highest level of confidentiality."],
+          ["4. Data Sharing", "We do not sell, trade, or rent your personal information to third parties. We may share your information with trusted service providers who assist us in operating our platform, including Anthropic (AI processing), Vercel (hosting), and Stripe (payment processing). These providers are bound by confidentiality agreements."],
+          ["5. Data Security", "We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. However, no method of transmission over the internet is 100% secure."],
+          ["6. Children's Privacy", "SpectraGuide is not directed to children under 13. We do not knowingly collect personal information from children under 13. If you believe we have collected information from a child under 13, please contact us immediately."],
+          ["7. Your Rights", "You have the right to access, correct, or delete your personal information at any time. You may also opt out of marketing communications. To exercise these rights, contact us at spectraguide@gmail.com."],
+          ["8. Contact Us", "If you have questions about this Privacy Policy, please contact us at spectraguide@gmail.com or visit spectraguide.org."],
+        ].map(([title, text]) => (
+          <div key={title} style={{ marginBottom:28 }}>
+            <h2 style={{ fontSize:17, fontWeight:800, color:C.dark, marginBottom:8 }}>{title}</h2>
+            <p style={{ fontSize:14, color:C.mid, lineHeight:1.8 }}>{text}</p>
+          </div>
+        ))}
+        <Btn variant="ghost" onClick={()=>setActive("Home")} style={{ marginTop:16 }}>← Back to Home</Btn>
+      </div>
+    </div>
+  );
+}
+
+// ─── TERMS OF SERVICE PAGE ────────────────────────────────────────────────────
+function TermsPage({ setActive }) {
+  const w = useWindowWidth(); const mobile = w<768;
+  return (
+    <div style={{ paddingTop:80, minHeight:"100vh", background:C.cream, padding:"80px 20px 60px" }}>
+      <div style={{ maxWidth:800, margin:"0 auto" }}>
+        <Pill color={C.lavender}>LEGAL</Pill>
+        <h1 style={{ fontFamily:serif, fontSize:mobile?26:34, fontWeight:900, color:C.dark, margin:"16px 0 8px" }}>Terms of Service</h1>
+        <p style={{ color:C.soft, fontSize:13, marginBottom:32 }}>Last updated: March 18, 2026</p>
+        {[
+          ["1. Acceptance of Terms", "By accessing or using SpectraGuide at spectraguide.org, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our service."],
+          ["2. Description of Service", "SpectraGuide provides an AI-powered autism advocacy platform including an AI Advocate Chat, IEP/BIP Analyzer, Resource Finder, and Learning Hub. Our service is designed to provide information and guidance, not legal or medical advice."],
+          ["3. Not a Substitute for Professional Advice", "SpectraGuide is an informational tool only. The content provided by our AI Advocate and IEP Analyzer is not legal advice, medical advice, or a substitute for consultation with qualified professionals. Always consult with qualified special education attorneys, therapists, and healthcare providers for specific advice about your situation."],
+          ["4. User Accounts", "You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You agree to provide accurate information when creating your account."],
+          ["5. Acceptable Use", "You agree not to use SpectraGuide to violate any laws, infringe on others' rights, transmit harmful content, or attempt to gain unauthorized access to our systems. We reserve the right to terminate accounts that violate these terms."],
+          ["6. Intellectual Property", "The SpectraGuide platform, including its design, features, and content, is owned by SpectraGuide and protected by applicable intellectual property laws. You may not copy, modify, or distribute our platform without permission."],
+          ["7. Subscriptions and Payments", "Paid subscriptions are billed monthly or annually. You may cancel at any time. Refunds are handled on a case-by-case basis. Payment processing is handled securely by Stripe."],
+          ["8. Limitation of Liability", "SpectraGuide shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of our service. Our total liability shall not exceed the amount you paid us in the past 12 months."],
+          ["9. Changes to Terms", "We may update these terms from time to time. We will notify users of significant changes via email. Continued use of the service after changes constitutes acceptance of the new terms."],
+          ["10. Contact", "For questions about these terms, contact us at spectraguide@gmail.com."],
+        ].map(([title, text]) => (
+          <div key={title} style={{ marginBottom:28 }}>
+            <h2 style={{ fontSize:17, fontWeight:800, color:C.dark, marginBottom:8 }}>{title}</h2>
+            <p style={{ fontSize:14, color:C.mid, lineHeight:1.8 }}>{text}</p>
+          </div>
+        ))}
+        <Btn variant="ghost" onClick={()=>setActive("Home")} style={{ marginTop:16 }}>← Back to Home</Btn>
+      </div>
+    </div>
   );
 }
 
@@ -1774,7 +1836,7 @@ function SEOStatePage({ state, setActive }) {
 }
 
 // ─── APP ROOT ─────────────────────────────────────────────────────────────────
-const ALL_PAGES = ["Home","Chat","IEP","Resources","Blog","Pricing","Booking","Dashboard","Admin","Partner","Press","About"];
+const ALL_PAGES = ["Home","Chat","IEP","Resources","Blog","Pricing","Booking","Dashboard","Admin","Partner","Press","About","Privacy","Terms"];
 
 export default function App() {
   useEffect(() => {
@@ -1824,6 +1886,8 @@ export default function App() {
     Partner:   <PartnerPage setActive={setActive} />,
     Press:     <PressKit />,
     About:     <AboutPage setActive={setActive} />,
+    Privacy:   <PrivacyPage setActive={setActive} />,
+    Terms:     <TermsPage setActive={setActive} />,
   };
 
   return (
