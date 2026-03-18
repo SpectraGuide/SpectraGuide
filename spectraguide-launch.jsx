@@ -1748,6 +1748,16 @@ function SEOStatePage({ state, setActive }) {
 const ALL_PAGES = ["Home","Chat","IEP","Resources","Blog","Pricing","Booking","Dashboard","Admin","Partner","Press","About"];
 
 export default function App() {
+  useEffect(() => {
+    // Google Analytics
+    const script1 = document.createElement('script');
+    script1.async = true;
+    script1.src = 'https://www.googletagmanager.com/gtag/js?id=G-2MT8NZD9WQ';
+    document.head.appendChild(script1);
+    const script2 = document.createElement('script');
+    script2.innerHTML = "window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-2MT8NZD9WQ');";
+    document.head.appendChild(script2);
+  }, []);
   const [active, setActive]               = useState("Home");
   const [lang,   setLang]                 = useState("en");
   const [user,   setUser]                 = useLocalStore("sg_user_v2", null);
