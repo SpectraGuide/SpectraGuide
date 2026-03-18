@@ -92,11 +92,12 @@ async function claudeChat(systemPrompt, userMessage, history = [], maxTokens = 1
 
 async function claudeJSONsafe(system, user, maxTokens = 2000) {
   const raw = await claudeChat(system, user, [], maxTokens);
-  const arrMatch = raw.match(/\[[\s\S]*\]/);
-  const objMatch = raw.match(/\{[\s\S]*\}/);
-  const match = arrMatch || objMatch;
-  if (!match) throw new Error("No JSON in response");
-  return JSON.parse(match[0]);
+  if (!raw || raw.startsWith("__ERR__")) throw new Error(raw || "No response");
+  const start = raw.indexOf('{');
+  const end = raw.lastIndexOf('}');
+  if (start === -1 || end === -1) throw new Error("No JSON found");
+  try { return JSON.parse(raw.slice(start, end + 1)); }
+  catch(e) { throw new Error("JSON parse failed: " + e.message); }
 }
 
 function exportIEPReport(analysis) {
@@ -482,7 +483,10 @@ function IEPAnalyzer({ user, iepHistory, setIepHistory }) {
 {"documentType":"IEP or BIP","studentName":"name or null","studentAge":"age/grade or null","disability":"disability category or null","overallScore":1-10,"scoreRationale":"1-2 sentences","summary":"3-4 sentence plain-language summary","strengths":["..."],"gaps":["specific gap with why it matters"],"redFlags":["serious concern with IDEA citation if applicable"],"goalAnalysis":["assessment of each goal"],"servicesReview":["assessment of each service"],"parentRights":["specific right with explanation"],"recommendations":["specific actionable recommendation"],"questionsToAsk":["pointed question for school team"],"nextSteps":["prioritized action step"],"legalConcerns":["potential IDEA/FAPE/LRE violation or null array"]}`, `Analyze this document:\n\n${docText}`, 2500);
       setAnalysis(result);
       if (user) setIepHistory(h => [{ date:new Date().toLocaleDateString(), text:docText.slice(0,80)+"...", result }, ...h.slice(0,9)]);
-    } catch { setAnalysis({ error:true }); }
+    } catch(err) {
+      console.error("IEP analysis error:", err);
+      setAnalysis({ error:true });
+    }
     setLoading(false);
   }
 
