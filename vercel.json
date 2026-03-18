@@ -1,5 +1,5 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "/spectraguide-full.html" }
+    { "source": "/(.*)", "destination": "/spectraguide-full (1).html" }
   ]
 }
