@@ -4,21 +4,20 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SpectraGuide — Autism Advocacy Platform</title>
-  <meta name="description" content="AI-powered autism advocacy. IEP analysis, resource finder, and 24/7 advocate chat."/>
+  <meta name="description" content="AI-powered autism advocacy platform for autism families."/>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; background: #FDF8F2; }
-    @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-7px)} }
+    *{box-sizing:border-box}
+    body{margin:0;background:#FDF8F2}
+    @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-7px)}}
   </style>
 </head>
 <body>
-  <div id="root"></div>
+  <div id="root"><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:#FDF8F2;font-family:Georgia,serif"><div style="font-size:48px">🧩</div><div style="font-size:22px;font-weight:900;color:#4BBFAD;margin-top:12px">SpectraGuide</div><div style="font-size:13px;color:#A09DC0;margin-top:8px">Loading...</div></div></div>
   <script>
-(function() {
-const { useState, useRef, useEffect, useCallback, useMemo } = React;
+const{useState,useRef,useEffect,useCallback}=React;
  function _optionalChain(ops) { let lastAccessLHS = undefined; let value = ops[0]; let i = 1; while (i < ops.length) { const op = ops[i]; const fn = ops[i + 1]; i += 2; if ((op === 'optionalAccess' || op === 'optionalCall') && value == null) { return undefined; } if (op === 'access' || op === 'optionalAccess') { lastAccessLHS = value; value = fn(value); } else if (op === 'call' || op === 'optionalCall') { value = fn((...args) => value.call(lastAccessLHS, ...args)); lastAccessLHS = undefined; } } return value; }
 
 // ─── DESIGN TOKENS ────────────────────────────────────────────────────────────
@@ -1813,13 +1812,7 @@ function App() {
   );
 }
 
-  try {
-    ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
-  } catch(e) {
-    document.getElementById('root').innerHTML = '<div style="padding:40px;font-family:sans-serif;color:red"><h2>Error loading SpectraGuide</h2><pre>' + e.message + '</pre></div>';
-    console.error('SpectraGuide render error:', e);
-  }
-})();
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
   </script>
 </body>
 </html>
