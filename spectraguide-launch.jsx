@@ -1013,34 +1013,36 @@ function ResourceFinder({ user, savedResources, setSavedResources, lang }) {
 
 // ─── BLOG ─────────────────────────────────────────────────────────────────────
 function BlogHub() {
-  const [posts, setPosts] = useState(null);
+  const STATIC_POSTS = [
+    {id:1,title:"Your IEP Rights: What Schools Don't Always Tell You",category:"IEP & Law",excerpt:"Every parent has powerful legal rights under IDEA — but schools aren't always required to explain them. Here's what you need to know before your next meeting.",author:"Sarah Mitchell, M.Ed.",readTime:"6 min read",emoji:"⚖️",tags:["iep","rights"]},
+    {id:2,title:"ABA Therapy Explained: Benefits, Controversies & What to Ask",category:"Therapies",excerpt:"ABA is the most widely recommended autism therapy — but it's also the most debated. We break down what the research actually says and how to evaluate any program.",author:"Dr. James Okafor, BCBA-D",readTime:"8 min read",emoji:"🧠",tags:["aba","therapy"]},
+    {id:3,title:"How to Prepare for an IEP Meeting (And Actually Win)",category:"Parenting",excerpt:"Walking into an IEP meeting unprepared is like going to court without a lawyer. These proven strategies will help you advocate effectively for your child.",author:"Tatyana Warren, Founder",readTime:"7 min read",emoji:"💪",tags:["iep","meeting"]},
+    {id:4,title:"Sensory Accommodations Every Classroom Should Offer",category:"School Strategies",excerpt:"Simple, low-cost accommodations can transform a school day for sensory-sensitive children. Here's a practical guide to request what your child needs.",author:"Lisa Chen, OT",readTime:"5 min read",emoji:"🎯",tags:["sensory","school"]},
+    {id:5,title:"I'm Autistic and This Is What I Wish My Parents Had Known",category:"Autistic Voices",excerpt:"A first-person perspective on growing up autistic — what helped, what hurt, and what every parent should hear directly from the community.",author:"Marcus Rivera, Self-Advocate",readTime:"9 min read",emoji:"💙",tags:["autistic voices","identity"]},
+    {id:6,title:"The Latest Research on Early Autism Intervention",category:"Research",excerpt:"New studies are reshaping what we know about early intervention. We summarize the findings that matter most for families making therapy decisions right now.",author:"Dr. Priya Sharma, PhD",readTime:"6 min read",emoji:"🔬",tags:["research","early intervention"]},
+    {id:7,title:"Transition Planning: Preparing Your Teen for Life After High School",category:"Adult Services",excerpt:"IDEA guarantees transition planning services starting at age 16 — but most families don't know what to ask for. This guide covers employment, housing, and independence.",author:"Kevin James, Transition Specialist",readTime:"8 min read",emoji:"🎓",tags:["transition","adult services"]},
+    {id:8,title:"What Is FAPE? Your Child's Right to a Free Appropriate Education",category:"IEP & Law",excerpt:"FAPE is one of the most important rights in special education law — and one of the most frequently violated. Learn what it means and how to enforce it.",author:"Attorney Diana Morse",readTime:"5 min read",emoji:"📋",tags:["fape","rights"]},
+    {id:9,title:"Talking to Your Child About Their Autism Diagnosis",category:"Parenting",excerpt:"When, how, and what to say when explaining autism to your child. Guidance from autistic adults and child psychologists on having this important conversation.",author:"Dr. Angela Brooks, PsyD",readTime:"7 min read",emoji:"❤️",tags:["diagnosis","parenting"]},
+  ];
+  const [posts] = useState(STATIC_POSTS);
   const [selected, setSelected] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [postLoading, setPostLoading] = useState(false);
   const [cat, setCat] = useState("All");
   const w = useWindowWidth(); const mobile = w<768;
   const CATS = ["All","IEP & Law","Therapies","Parenting","School Strategies","Autistic Voices","Research","Adult Services"];
 
-  async function loadPosts() {
-    setLoading(true);
-    try {
-      const raw = await claudeChat(`You are a content strategist for SpectraGuide. Generate 9 blog post previews as a JSON array. Return ONLY a JSON array starting with [. Each item: {"id":1,"title":"specific compelling title","category":"IEP & Law|Therapies|Parenting|School Strategies|Autistic Voices|Research|Adult Services","excerpt":"2-3 sentence teaser","author":"realistic name with credential","readTime":"X min read","emoji":"single emoji","tags":["tag1","tag2"]}`, "Generate 9 diverse blog posts for an autism advocacy platform", [], 1500);
-      const match = raw.match(/\[[\s\S]*\]/);
-      setPosts(match ? JSON.parse(match[0]) : []);
-    } catch { setPosts([]); }
-    setLoading(false);
-  }
-
   async function loadPost(post) {
     setSelected({...post, content:null}); setPostLoading(true);
     try {
-      const content = await claudeChat(`You are a senior writer for SpectraGuide. Write warm, evidence-based, practical articles in markdown format with ## headers. Target 600-700 words. Be empowering and specific.`, `Write the full article: "${post.title}"\nCategory: ${post.category}\nAuthor: ${post.author}\nAudience: parents, educators, autistic individuals`, [], 2000);
+      const content = await claudeChat(`You are a senior writer for SpectraGuide. Write warm, evidence-based, practical articles in markdown format with ## headers. Target 600-700 words. Be empowering and specific.`, `Write the full article: "${post.title}"
+Category: ${post.category}
+Author: ${post.author}
+Audience: parents, educators, autistic individuals`, [], 2000);
       setSelected({...post, content});
     } catch { setSelected({...post, content:"Unable to load article. Please try again."}); }
     setPostLoading(false);
   }
 
-  useEffect(() => { loadPosts(); }, []);
   const filtered = posts?.filter(p => cat==="All"||p.category===cat);
 
   if (selected) return (
@@ -1068,7 +1070,7 @@ function BlogHub() {
         <div style={{ display:"flex", gap:6, flexWrap:"wrap", justifyContent:"center", marginBottom:28 }}>
           {CATS.map(c => <button key={c} onClick={()=>setCat(c)} style={{ background:cat===c?`${C.sky}18`:"transparent", border:`1.5px solid ${cat===c?C.sky:C.border}`, borderRadius:999, padding:"6px 14px", fontSize:12, fontWeight:cat===c?700:500, color:cat===c?C.sky:C.mid, cursor:"pointer", fontFamily:font }}>{c}</button>)}
         </div>
-        {loading && <Card style={{ textAlign:"center", padding:44 }}><div style={{ fontSize:30 }}>📖</div><div style={{ fontWeight:700, color:C.dark, marginTop:10 }}>Loading articles…</div></Card>}
+
         <div style={{ display:"grid", gridTemplateColumns:mobile?"1fr":"repeat(auto-fit,minmax(290px,1fr))", gap:18 }}>
           {filtered?.map(post => (
             <Card key={post.id} style={{ cursor:"pointer" }} onClick={()=>loadPost(post)}>
