@@ -9,7 +9,28 @@ const C = {
 };
 const font  = "'Segoe UI', system-ui, sans-serif";
 const serif = "'Playfair Display', Georgia, serif";
-const MODEL = "claude-sonnet-4-20250514"; // Verified working model for artifact API calls
+const MODEL = "claude-sonnet-4-20250514";
+
+const STRIPE_PRICES = {
+  family:       "price_1TCPTO8iP7CLHxH9huST68Ho",
+  professional: "price_1TCPU88iP7CLHxH95DOnytak",
+  district:     "price_1TCPUT8iP7CLHxH9plA1BZWE",
+};
+
+async function startCheckout(priceId) {
+  try {
+    const res = await fetch("/api/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ priceId }),
+    });
+    const data = await res.json();
+    if (data.url) window.location.href = data.url;
+    else alert("Could not start checkout. Please try again.");
+  } catch(e) {
+    alert("Checkout error: " + e.message);
+  }
+} // Verified working model for artifact API calls
 
 // ─── TRANSLATIONS ─────────────────────────────────────────────────────────────
 const T = {
@@ -1103,7 +1124,13 @@ function PricingPage({ setActive }) {
                 <div style={{ marginBottom:20 }}>
                   {plan.features.map((f,i) => <div key={i} style={{ display:"flex", gap:7, marginBottom:7 }}><span style={{ color:plan.color, fontSize:13 }}>✓</span><span style={{ fontSize:12.5, color:C.mid }}>{f}</span></div>)}
                 </div>
-                <button onClick={()=>setActive("Dashboard")} style={{ width:"100%", background:plan.popular?`linear-gradient(135deg,${C.lavender},${C.sky})`:"white", border:plan.popular?"none":`2px solid ${C.border}`, borderRadius:11, padding:"11px 0", fontSize:13, fontWeight:700, color:plan.popular?"white":C.dark, cursor:"pointer", fontFamily:font, boxShadow:plan.popular?`0 6px 20px ${C.lavender}44`:"none" }}>{plan.cta}</button>
+                <button onClick={()=>{
+              if (plan.price === "Free") { setActive("Dashboard"); return; }
+              const key = plan.name.toLowerCase().replace(" plan","").replace("family","family").replace("professional","professional").replace("district","district");
+              const priceId = STRIPE_PRICES[key];
+              if (priceId) startCheckout(priceId);
+              else setActive("Dashboard");
+            }} style={{ width:"100%", background:plan.popular?`linear-gradient(135deg,${C.lavender},${C.sky})`:"white", border:plan.popular?"none":`2px solid ${C.border}`, borderRadius:11, padding:"11px 0", fontSize:13, fontWeight:700, color:plan.popular?"white":C.dark, cursor:"pointer", fontFamily:font, boxShadow:plan.popular?`0 6px 20px ${C.lavender}44`:"none" }}>{plan.cta}</button>
               </Card>
             </div>
           ))}
