@@ -1,0 +1,11 @@
+{
+  "name": "spectraguide",
+  "scripts": {
+    "build": "npx vite build",
+    "dev": "npx vite"
+  },
+  "dependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  }
+}
