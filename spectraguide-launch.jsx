@@ -228,7 +228,11 @@ function Nav({ active, setActive, user, setUser, lang, setLang, t }) {
               {!mobile && <span style={{ fontSize:13, fontWeight:600, color:C.dark }}>{user.name}</span>}
             </button>
             {user.isAdmin && <Btn size="sm" variant="dark" onClick={() => setActive("Admin")}>⚙️ Admin</Btn>}
-            <Btn variant="ghost" size="sm" onClick={() => setUser(null)}>{t.signOut}</Btn>
+            <Btn variant="ghost" size="sm" onClick={() => { 
+                setUser(null); 
+                setGated(true); 
+                try { localStorage.removeItem("sg_user_registered"); } catch {} 
+              }}>{t.signOut}</Btn>
           </div>
         ) : (
           <>
@@ -1293,7 +1297,11 @@ function Dashboard({ user, setUser, chatHistory, iepHistory, savedResources, wai
             </div>
             <div style={{ display:"flex", gap:8 }}>
               <Btn variant="gold" size="sm" onClick={()=>setActive("Pricing")}>Upgrade 💎</Btn>
-              <Btn variant="danger" size="sm" onClick={()=>setUser(null)}>Sign Out</Btn>
+              <Btn variant="danger" size="sm" onClick={()=>{ 
+                setUser(null); 
+                setGated(true); 
+                try { localStorage.removeItem("sg_user_registered"); } catch {} 
+              }}>Sign Out</Btn>
             </div>
           </div>
         </Card>
