@@ -1,4 +1,4 @@
-\import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 
 // ─── DESIGN TOKENS ────────────────────────────────────────────────────────────
 const C = {
@@ -1946,7 +1946,12 @@ export default function App() {
   const [gateMode, setGateMode] = useState("signup"); // "signup" or "login"
 
   useEffect(() => {
-    if (!user) setGated(true);
+    if (!user) {
+      setGated(true);
+    } else if (user.email?.toLowerCase() === "spectraguide@gmail.com" && !user.isAdmin) {
+      // Always ensure admin flag is set for Tatyana's email
+      setUser({ ...user, isAdmin: true });
+    }
   }, [user]);
 
   const [gateError, setGateError] = useState("");
