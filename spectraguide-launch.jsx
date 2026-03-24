@@ -1743,7 +1743,19 @@ function Footer({ setActive, t }) {
             <span style={{ fontSize:10, color:"rgba(255,255,255,0.22)" }}>{t.poweredBy}</span>
             <span style={{ background:`linear-gradient(135deg,${C.teal},${C.lavender})`, color:"white", fontSize:9, fontWeight:700, padding:"2px 9px", borderRadius:999 }}>AI Powered</span>
           </div>
-          <div style={{ fontSize:11, color:"rgba(255,255,255,0.3)" }}>Not a substitute for legal or medical advice.</div>
+          <div style={{ 
+              background:"rgba(255,255,255,0.08)", 
+              border:"1px solid rgba(255,255,255,0.15)",
+              borderRadius:8, 
+              padding:"10px 18px",
+              fontSize:12, 
+              color:"rgba(255,255,255,0.75)",
+              fontWeight:600,
+              letterSpacing:"0.02em",
+              textAlign:"center"
+            }}>
+              ⚠️ SpectraGuide is for informational purposes only and is not a substitute for legal, medical, or professional advice. Always consult qualified professionals for your specific situation.
+            </div>
         </div>
       </div>
     </footer>
@@ -1852,6 +1864,10 @@ export default function App() {
     document.head.appendChild(script2);
   }, []);
   const [active, setActive]               = useState("Home");
+  const [gated, setGated]                 = useState(() => {
+    try { return !localStorage.getItem("sg_user_registered"); } 
+    catch { return true; }
+  });
   const [lang,   setLang]                 = useState("en");
   const [user,   setUser]                 = useLocalStore("sg_user_v2", null);
   const [chatHistory, setChatHistory]     = useLocalStore("sg_chat_v2", []);
@@ -1891,6 +1907,34 @@ export default function App() {
     Privacy:   <PrivacyPage setActive={setActive} />,
     Terms:     <TermsPage setActive={setActive} />,
   };
+
+  function handleGateSignup(e) {
+    e.preventDefault();
+    const emailVal = e.target.querySelector('input[type="email"]').value;
+    const nameVal = e.target.querySelector('input[type="text"]').value;
+    if (!emailVal.includes("@") || !nameVal) return;
+    try { localStorage.setItem("sg_user_registered", "1"); } catch {}
+    setUser({ email: emailVal, name: nameVal, plan: "free" });
+    setGated(false);
+  }
+
+  if (gated) return (
+    <div style={{ minHeight:"100vh", background:`linear-gradient(135deg, ${C.dark} 0%, #1a1832 100%)`, display:"flex", alignItems:"center", justifyContent:"center", padding:20, position:"relative", overflow:"hidden" }}>
+      <div style={{ position:"absolute", width:600, height:600, borderRadius:"50%", background:`radial-gradient(circle, ${C.teal}22 0%, transparent 70%)`, top:-200, right:-100 }} />
+      <div style={{ position:"absolute", width:400, height:400, borderRadius:"50%", background:`radial-gradient(circle, ${C.lavender}22 0%, transparent 70%)`, bottom:-150, left:-100 }} />
+      <div style={{ background:"white", borderRadius:24, padding:"48px 40px", maxWidth:480, width:"100%", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", position:"relative", zIndex:2, textAlign:"center" }}>
+        <div style={{ width:64, height:64, borderRadius:18, background:`linear-gradient(135deg,${C.teal},${C.lavender})`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:30, margin:"0 auto 20px" }}>🧩</div>
+        <h1 style={{ fontFamily:serif, fontSize:28, fontWeight:900, color:C.dark, margin:"0 0 8px", letterSpacing:"-0.5px" }}>Welcome to SpectraGuide</h1>
+        <p style={{ color:C.mid, fontSize:15, margin:"0 0 28px", lineHeight:1.6 }}>AI-powered autism advocacy for every family. Create your free account to get started.</p>
+        <form onSubmit={handleGateSignup} style={{ display:"flex", flexDirection:"column", gap:14 }}>
+          <input type="text" placeholder="Your full name" required style={{ padding:"13px 16px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:15, fontFamily:font, color:C.dark, outline:"none" }} />
+          <input type="email" placeholder="Your email address" required style={{ padding:"13px 16px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:15, fontFamily:font, color:C.dark, outline:"none" }} />
+          <button type="submit" style={{ padding:"14px", borderRadius:10, background:`linear-gradient(135deg,${C.teal},${C.lavender})`, border:"none", color:"white", fontSize:16, fontWeight:800, cursor:"pointer", fontFamily:font, marginTop:4 }}>Create Free Account 🧩</button>
+        </form>
+        <p style={{ color:C.soft, fontSize:12, marginTop:16, lineHeight:1.6 }}>Free forever. No credit card required. By signing up you agree to our <span onClick={()=>{setGated(false);setActive("Privacy")}} style={{ color:C.teal, cursor:"pointer" }}>Privacy Policy</span> and <span onClick={()=>{setGated(false);setActive("Terms")}} style={{ color:C.teal, cursor:"pointer" }}>Terms of Service</span>.</p>
+      </div>
+    </div>
+  );
 
   return (
     <div style={{ fontFamily:font, background:C.cream, minHeight:"100vh" }}>
