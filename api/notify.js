@@ -24,7 +24,7 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'SpectraGuide <onboarding@resend.dev>',
+        from: 'SpectraGuide <hello@spectraguide.org>',
         to: ['spectraguide@gmail.com'],
         subject: subjects[type] || 'SpectraGuide Notification',
         text: bodies[type] || JSON.stringify(req.body),
