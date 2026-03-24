@@ -1908,15 +1908,40 @@ export default function App() {
     if (!user) setGated(true);
   }, [user]);
 
+  const [gateError, setGateError] = useState("");
+
   function handleGateSignup(e) {
     e.preventDefault();
+    setGateError("");
     const emailVal = e.target.querySelector('input[type="email"]').value;
-    const nameVal = e.target.querySelector('input[type="text"]') ? e.target.querySelector('input[type="text"]').value : "";
-    if (!emailVal.includes("@")) return;
-    if (gateMode === "signup" && !nameVal) return;
-    // Session only - no persistent storage
-    setUser({ email: emailVal, name: nameVal || emailVal.split("@")[0], plan: "free" });
-    setGated(false);
+    const passwords = e.target.querySelectorAll('input[type="password"]');
+    const passwordVal = passwords[0]?.value || "";
+    const nameVal = e.target.querySelector('input[type="text"]')?.value || "";
+
+    if (!emailVal.includes("@")) { setGateError("Please enter a valid email address."); return; }
+    if (!passwordVal || passwordVal.length < 6) { setGateError("Password must be at least 6 characters."); return; }
+
+    if (gateMode === "signup") {
+      if (!nameVal) { setGateError("Please enter your full name."); return; }
+      const confirmVal = passwords[1]?.value || "";
+      if (passwordVal !== confirmVal) { setGateError("Passwords do not match."); return; }
+      try {
+        const accounts = JSON.parse(localStorage.getItem("sg_accounts") || "{}");
+        if (accounts[emailVal]) { setGateError("An account with this email already exists. Please sign in."); setGateMode("login"); return; }
+        accounts[emailVal] = { name: nameVal, password: passwordVal, plan: "free", created: new Date().toISOString() };
+        localStorage.setItem("sg_accounts", JSON.stringify(accounts));
+      } catch {}
+      setUser({ email: emailVal, name: nameVal, plan: "free" });
+      setGated(false);
+    } else {
+      try {
+        const accounts = JSON.parse(localStorage.getItem("sg_accounts") || "{}");
+        if (!accounts[emailVal]) { setGateError("No account found with this email. Please sign up."); return; }
+        if (accounts[emailVal].password !== passwordVal) { setGateError("Incorrect password. Please try again."); return; }
+        setUser({ email: emailVal, name: accounts[emailVal].name, plan: accounts[emailVal].plan || "free" });
+        setGated(false);
+      } catch { setGateError("Something went wrong. Please try again."); }
+    }
   }
 
   if (gated) return (
@@ -1947,6 +1972,15 @@ export default function App() {
             <input type="text" placeholder="Your full name" required style={{ padding:"13px 16px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:15, fontFamily:font, color:C.dark, outline:"none" }} />
           )}
           <input type="email" placeholder="Your email address" required style={{ padding:"13px 16px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:15, fontFamily:font, color:C.dark, outline:"none" }} />
+          <input type="password" placeholder={gateMode === "signup" ? "Create a password (min 6 characters)" : "Your password"} required style={{ padding:"13px 16px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:15, fontFamily:font, color:C.dark, outline:"none" }} />
+          {gateMode === "signup" && (
+            <input type="password" placeholder="Confirm your password" required style={{ padding:"13px 16px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:15, fontFamily:font, color:C.dark, outline:"none" }} />
+          )}
+          {gateError && (
+            <div style={{ background:"#FFF0F0", border:"1.5px solid #F4707A", borderRadius:8, padding:"10px 14px", fontSize:13, color:"#c0392b", textAlign:"left" }}>
+              ⚠️ {gateError}
+            </div>
+          )}
           <button type="submit" style={{ padding:"14px", borderRadius:10, background:`linear-gradient(135deg,${C.teal},${C.lavender})`, border:"none", color:"white", fontSize:16, fontWeight:800, cursor:"pointer", fontFamily:font, marginTop:4 }}>
             {gateMode === "signup" ? "Create Free Account 🧩" : "Sign In →"}
           </button>
