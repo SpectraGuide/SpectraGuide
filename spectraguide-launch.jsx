@@ -228,11 +228,7 @@ function Nav({ active, setActive, user, setUser, lang, setLang, t }) {
               {!mobile && <span style={{ fontSize:13, fontWeight:600, color:C.dark }}>{user.name}</span>}
             </button>
             {user.isAdmin && <Btn size="sm" variant="dark" onClick={() => setActive("Admin")}>⚙️ Admin</Btn>}
-            <Btn variant="ghost" size="sm" onClick={() => { 
-                setUser(null); 
-                setGated(true); 
-                try { localStorage.removeItem("sg_user_registered"); } catch {} 
-              }}>{t.signOut}</Btn>
+            <Btn variant="ghost" size="sm" onClick={() => setUser(null)}>{t.signOut}</Btn>
           </div>
         ) : (
           <>
@@ -1297,11 +1293,7 @@ function Dashboard({ user, setUser, chatHistory, iepHistory, savedResources, wai
             </div>
             <div style={{ display:"flex", gap:8 }}>
               <Btn variant="gold" size="sm" onClick={()=>setActive("Pricing")}>Upgrade 💎</Btn>
-              <Btn variant="danger" size="sm" onClick={()=>{ 
-                setUser(null); 
-                setGated(true); 
-                try { localStorage.removeItem("sg_user_registered"); } catch {} 
-              }}>Sign Out</Btn>
+              <Btn variant="danger" size="sm" onClick={()=>setUser(null)}>Sign Out</Btn>
             </div>
           </div>
         </Card>
@@ -1870,10 +1862,7 @@ export default function App() {
     document.head.appendChild(script2);
   }, []);
   const [active, setActive]               = useState("Home");
-  const [gated, setGated]                 = useState(() => {
-    try { return !localStorage.getItem("sg_user_registered"); } 
-    catch { return true; }
-  });
+  const [gated, setGated]                 = useState(true);
   const [lang,   setLang]                 = useState("en");
   const [user,   setUser]                 = useLocalStore("sg_user_v2", null);
   const [chatHistory, setChatHistory]     = useLocalStore("sg_chat_v2", []);
@@ -1915,13 +1904,17 @@ export default function App() {
 
   const [gateMode, setGateMode] = useState("signup"); // "signup" or "login"
 
+  useEffect(() => {
+    if (!user) setGated(true);
+  }, [user]);
+
   function handleGateSignup(e) {
     e.preventDefault();
     const emailVal = e.target.querySelector('input[type="email"]').value;
     const nameVal = e.target.querySelector('input[type="text"]') ? e.target.querySelector('input[type="text"]').value : "";
     if (!emailVal.includes("@")) return;
     if (gateMode === "signup" && !nameVal) return;
-    try { localStorage.setItem("sg_user_registered", "1"); } catch {}
+    // Session only - no persistent storage
     setUser({ email: emailVal, name: nameVal || emailVal.split("@")[0], plan: "free" });
     setGated(false);
   }
