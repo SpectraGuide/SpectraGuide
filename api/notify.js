@@ -7,16 +7,17 @@ export default async function handler(req, res) {
     signup: `🧩 New SpectraGuide Signup — ${name}`,
     upgrade: `💳 New Paid Subscriber — ${name} (${plan})`,
     iep: `📋 IEP Analysis Completed — ${email}`,
+    referral: `🎁 New Referral Used — ${email}`,
   };
 
   const bodies = {
     signup: `New free signup on SpectraGuide!\n\nName: ${name}\nEmail: ${email}\nTime: ${new Date().toLocaleString()}\n\nLog in to your admin dashboard at spectraguide.org to see all signups.`,
     upgrade: `You have a new paying customer! 🎉\n\nName: ${name}\nEmail: ${email}\nPlan: ${plan}\nTime: ${new Date().toLocaleString()}\n\nMoney is on its way to your Stripe account!`,
-    iep: `A user just analyzed an IEP on SpectraGuide.\n\nEmail: ${email}\nTime: ${new Date().toLocaleString()}`,
+    iep: `A user just analyzed an IEP.\n\nEmail: ${email}\nTime: ${new Date().toLocaleString()}`,
+    referral: `A referral code was just used!\n\nNew user: ${email}\nReferral from: ${name}\nTime: ${new Date().toLocaleString()}\n\nBoth users should receive one free month.`,
   };
 
   try {
-    // Send via Resend API (free tier: 100 emails/day)
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -32,6 +33,10 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
+    if (data.error) {
+      console.error('Resend error:', data.error);
+      return res.status(400).json({ error: data.error });
+    }
     return res.status(200).json({ success: true, data });
   } catch (e) {
     console.error('Notify error:', e);
