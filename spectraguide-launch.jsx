@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+\import { useState, useRef, useEffect, useCallback } from "react";
 
 // ─── DESIGN TOKENS ────────────────────────────────────────────────────────────
 const C = {
@@ -228,6 +228,9 @@ function Nav({ active, setActive, user, setUser, lang, setLang, t }) {
               {!mobile && <span style={{ fontSize:13, fontWeight:600, color:C.dark }}>{user.name}</span>}
             </button>
             {user.isAdmin && <Btn size="sm" variant="dark" onClick={() => setActive("Admin")}>⚙️ Admin</Btn>}
+            {(user.plan === "Family" || user.plan === "Professional" || user.plan === "District" || user.plan === "family" || user.plan === "professional" || user.plan === "district") && (
+              <span style={{ background:`linear-gradient(135deg,${C.gold},${C.peach})`, color:"white", fontSize:9, fontWeight:800, padding:"3px 10px", borderRadius:999, letterSpacing:"0.05em" }}>⭐ PRO</span>
+            )}
             <Btn variant="ghost" size="sm" onClick={() => setUser(null)}>{t.signOut}</Btn>
           </div>
         ) : (
@@ -424,6 +427,18 @@ Siempre reconoce las emociones primero. Explica el vocabulario técnico. Usa est
 
   async function send(text) {
     const msg = text || input.trim(); if (!msg) return;
+    // Free plan: 10 messages per day
+    const isPaid = user && (user.plan === "Family" || user.plan === "Professional" || user.plan === "District" || user.plan === "family" || user.plan === "professional" || user.plan === "district");
+    if (!isPaid) {
+      const today = new Date().toDateString();
+      const key = `sg_chat_${user?.email || "guest"}_${today}`;
+      const count = parseInt(localStorage.getItem(key) || "0");
+      if (count >= 10) {
+        setMessages(m => [...m, { role:"assistant", content:"💙 You've used your 10 free messages for today.\n\nUpgrade to the **Family Plan** for unlimited AI advocacy chat, unlimited IEP analyses, and priority support.\n\n[Upgrade Now →](/pricing)" }]);
+        return;
+      }
+      localStorage.setItem(key, (count + 1).toString());
+    }
     setInput("");
     const newMsgs = [...messages, { role:"user", content:msg }];
     setMessages(newMsgs); setLoading(true);
@@ -497,6 +512,18 @@ function IEPAnalyzer({ user, iepHistory, setIepHistory }) {
 
   async function analyze() {
     if (!docText.trim()) return;
+    // Free plan: 2 IEP analyses per month
+    const isPaidUser = user && (user.plan === "Family" || user.plan === "Professional" || user.plan === "District" || user.plan === "family" || user.plan === "professional" || user.plan === "district");
+    if (!isPaidUser) {
+      const month = new Date().toISOString().slice(0, 7);
+      const key = `sg_iep_${user?.email || "guest"}_${month}`;
+      const count = parseInt(localStorage.getItem(key) || "0");
+      if (count >= 2) {
+        setAnalysis({ limitReached: true });
+        return;
+      }
+      localStorage.setItem(key, (count + 1).toString());
+    }
     setLoading(true); setAnalysis(null);
     try {
       const result = await claudeJSONsafe(`You are SpectraGuide's expert IEP/BIP Analyzer powered by AI with deep knowledge of IDEA, FAPE, LRE, Section 504. Return a single JSON object (not an array):
@@ -557,6 +584,14 @@ function IEPAnalyzer({ user, iepHistory, setIepHistory }) {
           </div>
         </Card>
 
+        {analysis?.limitReached && (
+          <Card style={{ textAlign:"center", padding:48, border:`2px solid ${C.teal}33` }}>
+            <div style={{ fontSize:36, marginBottom:12 }}>💙</div>
+            <div style={{ fontWeight:800, fontSize:18, color:C.dark, marginBottom:8 }}>You've used your 2 free IEP analyses this month</div>
+            <p style={{ color:C.mid, fontSize:14, marginBottom:20, lineHeight:1.7 }}>Upgrade to the Family Plan for unlimited IEP/BIP analysis, unlimited AI chat, and priority support.</p>
+            <Btn onClick={()=>setActive("Pricing")} style={{ background:`linear-gradient(135deg,${C.teal},${C.lavender})` }}>Upgrade to Family Plan — $19/mo →</Btn>
+          </Card>
+        )}
         {loading && <Card style={{ textAlign:"center", padding:48 }}><div style={{ fontSize:36, marginBottom:12 }}>🧩</div><div style={{ fontWeight:700, fontSize:17, color:C.dark }}>Reading your document…</div><div style={{ color:C.mid, fontSize:13, marginTop:6 }}>Checking goals, services, rights, and potential gaps with AI.</div></Card>}
 
         {analysis && !analysis.error && (
@@ -1250,7 +1285,7 @@ function Dashboard({ user, setUser, chatHistory, iepHistory, savedResources, wai
     if (!form.email.includes("@")) return setErr("Enter a valid email.");
     if (form.password.length<4) return setErr("Password must be 4+ characters.");
     if (mode==="signup"&&!form.name.trim()) return setErr("Enter your name.");
-    setUser({ name:mode==="signup"?form.name:form.email.split("@")[0], email:form.email, plan:"Free", joined:new Date().toLocaleDateString(), isAdmin:form.email.includes("admin") });
+    setUser({ name:mode==="signup"?form.name:form.email.split("@")[0], email:form.email, plan:"Free", joined:new Date().toLocaleDateString(), isAdmin:form.email.toLowerCase() === "spectraguide@gmail.com" });
     setErr("");
   }
 
@@ -1384,11 +1419,14 @@ function AdminDashboard({ waitlist, bookings, iepHistory, chatHistory, savedReso
   const totalIEPs = iepHistory.length + 12043;
   const totalChats = chatHistory.filter(m=>m.role==="user").length + 48291;
 
+  // Load real signups from localStorage
+  const allAccounts = (() => { try { return Object.entries(JSON.parse(localStorage.getItem("sg_accounts") || "{}")); } catch { return []; } })();
+  const recentSignups = allAccounts.slice(-10).reverse().map(([email, data]) => ({ type:"signup", text:`New signup: ${data.name} (${email})`, time:data.created || "Today", color:C.teal, plan: data.plan || "free" }));
+
   const recentActivity = [
-    ...waitlist.slice(-3).map(w=>({ type:"signup", text:`New signup: ${w.email}`, time:w.date, color:C.teal })),
-    ...bookings.slice(-3).map(b=>({ type:"booking", text:`Demo booked: ${b.name} (${b.org||b.role})`, time:b.createdAt, color:C.lavender })),
-    ...iepHistory.slice(-2).map(h=>({ type:"iep", text:`IEP analyzed — Score ${h.result?.overallScore}/10`, time:h.date, color:C.peach })),
-  ].sort((a,b) => new Date(b.time)-new Date(a.time)).slice(0,8);
+    ...recentSignups,
+    ...iepHistory.slice(-3).map(h=>({ type:"iep", text:`IEP analyzed — Score ${h.result?.overallScore}/10`, time:h.date, color:C.peach })),
+  ].sort((a,b) => new Date(b.time)-new Date(a.time)).slice(0,10);
 
   return (
     <div style={{ paddingTop:80, minHeight:"100vh", background:C.cream, padding:"80px 20px 60px" }}>
@@ -1402,7 +1440,7 @@ function AdminDashboard({ waitlist, bookings, iepHistory, chatHistory, savedReso
         </div>
 
         <div style={{ display:"grid", gridTemplateColumns:mobile?"1fr 1fr":"repeat(4,1fr)", gap:14, marginBottom:22 }}>
-          {[{ icon:"👥", label:"Total Users", value:totalUsers.toLocaleString(), change:"+12% this week", color:C.teal },{ icon:"📋", label:"IEPs Analyzed", value:totalIEPs.toLocaleString(), change:"+8% this week", color:C.lavender },{ icon:"💬", label:"Chat Messages", value:totalChats.toLocaleString(), change:"+22% this week", color:C.peach },{ icon:"📅", label:"Demos Booked", value:(bookings.length+47).toString(), change:`+${bookings.length} new`, color:C.gold }].map(s => (
+          {[{ icon:"👥", label:"Total Signups", value:allAccounts.length.toString(), change:`${recentSignups.length} recent`, color:C.teal },{ icon:"📋", label:"IEPs Analyzed", value:iepHistory.length.toString(), change:"All time", color:C.lavender },{ icon:"💬", label:"Chat Sessions", value:chatHistory.filter(m=>m.role==="user").length.toString(), change:"All time", color:C.peach },{ icon:"💳", label:"Free Users", value:allAccounts.filter(([_,d])=>d.plan==="free"||!d.plan).length.toString(), change:"Upgrade opportunity", color:C.gold }].map(s => (
             <Card key={s.label}>
               <div style={{ fontSize:22, marginBottom:8 }}>{s.icon}</div>
               <div style={{ fontFamily:serif, fontSize:26, fontWeight:900, color:s.color }}>{s.value}</div>
@@ -1415,25 +1453,28 @@ function AdminDashboard({ waitlist, bookings, iepHistory, chatHistory, savedReso
         <div style={{ display:"grid", gridTemplateColumns:mobile?"1fr":"1fr 1fr", gap:18, marginBottom:18 }}>
           <Card>
             <div style={{ fontWeight:800, fontSize:14, color:C.dark, marginBottom:14 }}>📈 Waitlist Signups</div>
-            {waitlist.length===0 ? <div style={{ color:C.soft, fontSize:13 }}>No signups yet — share your launch link!</div> : (
+            {allAccounts.length===0 ? <div style={{ color:C.soft, fontSize:13 }}>No signups yet — share your launch link!</div> : (
               <div>
-                {waitlist.slice(-6).reverse().map((w,i) => (
-                  <div key={i} style={{ display:"flex", justifyContent:"space-between", padding:"8px 0", borderBottom:i<Math.min(waitlist.length,6)-1?`1px solid ${C.border}`:"none" }}>
-                    <span style={{ fontSize:13, color:C.dark }}>{w.email}</span>
-                    <span style={{ fontSize:11, color:C.soft }}>{w.date}</span>
+                {allAccounts.slice(-6).reverse().map(([email, data], i) => (
+                  <div key={i} style={{ padding:"8px 0", borderBottom:i<Math.min(allAccounts.length,6)-1?`1px solid ${C.border}`:"none" }}>
+                    <div style={{ display:"flex", justifyContent:"space-between" }}>
+                      <span style={{ fontSize:13, fontWeight:600, color:C.dark }}>{data.name}</span>
+                      <span style={{ fontSize:10, background:data.plan&&data.plan!=="free"?`${C.teal}20`:`${C.lavender}20`, color:data.plan&&data.plan!=="free"?C.teal:C.lavender, padding:"2px 8px", borderRadius:999, fontWeight:700 }}>{data.plan||"free"}</span>
+                    </div>
+                    <div style={{ fontSize:11, color:C.soft }}>{email} · {data.created ? new Date(data.created).toLocaleDateString() : "Today"}</div>
                   </div>
                 ))}
-                <div style={{ marginTop:12, fontSize:12, fontWeight:700, color:C.teal }}>Total: {(waitlist.length+50234).toLocaleString()} signups</div>
+                <div style={{ marginTop:12, fontSize:12, fontWeight:700, color:C.teal }}>Total registered: {allAccounts.length}</div>
               </div>
             )}
           </Card>
           <Card>
-            <div style={{ fontWeight:800, fontSize:14, color:C.dark, marginBottom:14 }}>📅 Demo Requests</div>
-            {bookings.length===0 ? <div style={{ color:C.soft, fontSize:13 }}>No bookings yet.</div> : (
-              bookings.slice(-5).reverse().map((b,i) => (
-                <div key={i} style={{ padding:"8px 0", borderBottom:i<Math.min(bookings.length,5)-1?`1px solid ${C.border}`:"none" }}>
-                  <div style={{ fontSize:13, fontWeight:600, color:C.dark }}>{b.name}</div>
-                  <div style={{ fontSize:11, color:C.soft }}>{b.org||b.role} · {b.date} {b.time}</div>
+            <div style={{ fontWeight:800, fontSize:14, color:C.dark, marginBottom:14 }}>📋 IEP Analyses</div>
+            {iepHistory.length===0 ? <div style={{ color:C.soft, fontSize:13 }}>No IEP analyses yet.</div> : (
+              iepHistory.slice(-5).reverse().map((h,i) => (
+                <div key={i} style={{ padding:"8px 0", borderBottom:i<Math.min(iepHistory.length,5)-1?`1px solid ${C.border}`:"none" }}>
+                  <div style={{ fontSize:13, fontWeight:600, color:C.dark }}>Score: {h.result?.overallScore || "?"}/10</div>
+                  <div style={{ fontSize:11, color:C.soft }}>{h.text?.slice(0,40)}... · {h.date}</div>
                 </div>
               ))
             )}
@@ -1931,14 +1972,16 @@ export default function App() {
         accounts[emailVal] = { name: nameVal, password: passwordVal, plan: "free", created: new Date().toISOString() };
         localStorage.setItem("sg_accounts", JSON.stringify(accounts));
       } catch {}
-      setUser({ email: emailVal, name: nameVal, plan: "free" });
+      setUser({ email: emailVal, name: nameVal, plan: "free", isAdmin: emailVal.toLowerCase() === "spectraguide@gmail.com" });
       setGated(false);
+      // Notify Tatyana of new signup
+      fetch("/api/notify", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ type:"signup", name: nameVal, email: emailVal, plan:"free" }) }).catch(()=>{});
     } else {
       try {
         const accounts = JSON.parse(localStorage.getItem("sg_accounts") || "{}");
         if (!accounts[emailVal]) { setGateError("No account found with this email. Please sign up."); return; }
         if (accounts[emailVal].password !== passwordVal) { setGateError("Incorrect password. Please try again."); return; }
-        setUser({ email: emailVal, name: accounts[emailVal].name, plan: accounts[emailVal].plan || "free" });
+        setUser({ email: emailVal, name: accounts[emailVal].name, plan: accounts[emailVal].plan || "free", isAdmin: emailVal.toLowerCase() === "spectraguide@gmail.com" });
         setGated(false);
       } catch { setGateError("Something went wrong. Please try again."); }
     }
