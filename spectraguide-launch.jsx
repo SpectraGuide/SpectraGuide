@@ -41,7 +41,7 @@ const T = {
     blog:"Learning Hub", pricing:"Pricing", dashboard:"Dashboard",
     about:"About", admin:"Admin", partner:"Partner", press:"Press",
     getStarted:"Get Started Free", signIn:"Sign In", signOut:"Sign Out",
-    home:"Home", booking:"Book a Demo",
+    home:"Home", 
     heroSub:"SpectraGuide is your AI-powered autism advocate — helping families, educators, and individuals navigate IEPs, find resources, and understand their rights.",
     joinFree:"Join Free — It's Free", waitlistTitle:"Join 50,000+ families — free early access",
     waitlistSub:"Get notified about new features, resources, and advocacy tips.",
@@ -54,7 +54,7 @@ const T = {
     blog:"Centro de Aprendizaje", pricing:"Precios", dashboard:"Panel",
     about:"Nosotros", admin:"Admin", partner:"Asociado", press:"Prensa",
     getStarted:"Comenzar Gratis", signIn:"Iniciar Sesión", signOut:"Cerrar Sesión",
-    home:"Inicio", booking:"Reservar Demo",
+    home:"Inicio", 
     heroSub:"SpectraGuide es tu defensor de autismo con IA — ayudando a familias, educadores e individuos a navegar los IEPs, encontrar recursos y comprender sus derechos.",
     joinFree:"Únete Gratis", waitlistTitle:"Únete a más de 50,000 familias — acceso temprano gratuito",
     waitlistSub:"Recibe notificaciones sobre nuevas funciones, recursos y consejos de defensa.",
@@ -198,7 +198,7 @@ const Input = ({ value, onChange, placeholder, type="text", style:s={} }) => (
 );
 
 // ─── NAV ──────────────────────────────────────────────────────────────────────
-const NAV_MAIN = ["Home","Chat","IEP","Resources","Blog","Pricing","Booking"];
+const NAV_MAIN = ["Home","Chat","IEP","Resources","Blog","Pricing"];
 function Nav({ active, setActive, user, setUser, lang, setLang, t }) {
   const w = useWindowWidth();
   const mobile = w < 768;
@@ -378,7 +378,6 @@ function HomePage({ setActive, waitlist, setWaitlist, t }) {
         <p style={{ color:"rgba(255,255,255,0.6)", fontSize:16, maxWidth:400, margin:"0 auto 32px" }}>Join thousands of families who've found their voice.</p>
         <div style={{ display:"flex", gap:12, justifyContent:"center", flexWrap:"wrap" }}>
           <Btn size="lg" variant="gold" onClick={() => setActive("Pricing")}>See Plans 💎</Btn>
-          <Btn size="lg" variant="secondary" onClick={() => setActive("Booking")}>📅 Book a Demo</Btn>
         </div>
       </section>
     </div>
@@ -1688,7 +1687,6 @@ function AboutPage({ setActive }) {
           <p style={{ color:C.mid, fontSize:14, maxWidth:440, margin:"0 auto 24px", lineHeight:1.75 }}>We're partnering with school districts, therapy providers, advocacy organizations, and mission-aligned investors to reach every family who needs us.</p>
           <div style={{ display:"flex", gap:10, justifyContent:"center", flexWrap:"wrap" }}>
             <Btn onClick={()=>setActive("Partner")}>🤝 Become a Partner</Btn>
-            <Btn variant="secondary" onClick={()=>setActive("Booking")}>📅 Book a Demo</Btn>
           </div>
         </Card>
 
@@ -1720,7 +1718,7 @@ function Footer({ setActive, t }) {
           </div>
           {[{ title:"Platform", links:[["Chat","Chat"],["IEP Analyzer","IEP"],["Resources","Resources"],["Learning Hub","Blog"]] },
             { title:"Company", links:[["About","About"],["Pricing","Pricing"],["Press Kit","Press"],["Partner","Partner"]] },
-            { title:"Get Help", links:[["Book a Demo","Booking"],["Advocate Chat","Chat"],["Resource Finder","Resources"]] },
+            { title:"Get Help", links:[["Advocate Chat","Chat"],["Resource Finder","Resources"]] },
             { title:"Legal", links:[["Privacy Policy","Privacy"],["Terms of Service","Terms"],["FERPA Compliance","FERPA"]] }
           ].map(col => (
             <div key={col.title}>
@@ -1850,7 +1848,7 @@ function SEOStatePage({ state, setActive }) {
 }
 
 // ─── APP ROOT ─────────────────────────────────────────────────────────────────
-const ALL_PAGES = ["Home","Chat","IEP","Resources","Blog","Pricing","Booking","Dashboard","Admin","Partner","Press","About","Privacy","Terms"];
+const ALL_PAGES = ["Home","Chat","IEP","Resources","Blog","Pricing","Dashboard","Admin","Partner","Press","About","Privacy","Terms"];
 
 export default function App() {
   useEffect(() => {
@@ -1898,7 +1896,6 @@ export default function App() {
     Resources: <ResourceFinder {...sharedProps} savedResources={savedRes} setSavedResources={setSavedRes} />,
     Blog:      <BlogHub />,
     Pricing:   <PricingPage setActive={setActive} />,
-    Booking:   <BookingPage bookings={bookings} setBookings={setBookings} />,
     Dashboard: <Dashboard {...sharedProps} chatHistory={chatHistory} iepHistory={iepHistory} savedResources={savedRes} waitlist={waitlist} referrals={referrals} />,
     Admin:     <AdminDashboard waitlist={waitlist} bookings={bookings} iepHistory={iepHistory} chatHistory={chatHistory} savedResources={savedRes} />,
     Partner:   <PartnerPage setActive={setActive} />,
@@ -1908,13 +1905,16 @@ export default function App() {
     Terms:     <TermsPage setActive={setActive} />,
   };
 
+  const [gateMode, setGateMode] = useState("signup"); // "signup" or "login"
+
   function handleGateSignup(e) {
     e.preventDefault();
     const emailVal = e.target.querySelector('input[type="email"]').value;
-    const nameVal = e.target.querySelector('input[type="text"]').value;
-    if (!emailVal.includes("@") || !nameVal) return;
+    const nameVal = e.target.querySelector('input[type="text"]') ? e.target.querySelector('input[type="text"]').value : "";
+    if (!emailVal.includes("@")) return;
+    if (gateMode === "signup" && !nameVal) return;
     try { localStorage.setItem("sg_user_registered", "1"); } catch {}
-    setUser({ email: emailVal, name: nameVal, plan: "free" });
+    setUser({ email: emailVal, name: nameVal || emailVal.split("@")[0], plan: "free" });
     setGated(false);
   }
 
@@ -1924,14 +1924,38 @@ export default function App() {
       <div style={{ position:"absolute", width:400, height:400, borderRadius:"50%", background:`radial-gradient(circle, ${C.lavender}22 0%, transparent 70%)`, bottom:-150, left:-100 }} />
       <div style={{ background:"white", borderRadius:24, padding:"48px 40px", maxWidth:480, width:"100%", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", position:"relative", zIndex:2, textAlign:"center" }}>
         <div style={{ width:64, height:64, borderRadius:18, background:`linear-gradient(135deg,${C.teal},${C.lavender})`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:30, margin:"0 auto 20px" }}>🧩</div>
-        <h1 style={{ fontFamily:serif, fontSize:28, fontWeight:900, color:C.dark, margin:"0 0 8px", letterSpacing:"-0.5px" }}>Welcome to SpectraGuide</h1>
-        <p style={{ color:C.mid, fontSize:15, margin:"0 0 28px", lineHeight:1.6 }}>AI-powered autism advocacy for every family. Create your free account to get started.</p>
+        <h1 style={{ fontFamily:serif, fontSize:28, fontWeight:900, color:C.dark, margin:"0 0 8px", letterSpacing:"-0.5px" }}>
+          {gateMode === "signup" ? "Welcome to SpectraGuide" : "Welcome Back! 💙"}
+        </h1>
+        <p style={{ color:C.mid, fontSize:15, margin:"0 0 28px", lineHeight:1.6 }}>
+          {gateMode === "signup" ? "AI-powered autism advocacy for every family. Create your free account to get started." : "Sign in to access your SpectraGuide account."}
+        </p>
+
+        {/* Toggle tabs */}
+        <div style={{ display:"flex", background:C.cream, borderRadius:12, padding:4, marginBottom:24 }}>
+          <button onClick={()=>setGateMode("signup")} style={{ flex:1, padding:"10px", borderRadius:9, border:"none", background:gateMode==="signup"?`linear-gradient(135deg,${C.teal},${C.lavender})`:"transparent", color:gateMode==="signup"?"white":C.mid, fontSize:14, fontWeight:700, cursor:"pointer", fontFamily:font, transition:"all 0.2s" }}>
+            Create Account
+          </button>
+          <button onClick={()=>setGateMode("login")} style={{ flex:1, padding:"10px", borderRadius:9, border:"none", background:gateMode==="login"?`linear-gradient(135deg,${C.teal},${C.lavender})`:"transparent", color:gateMode==="login"?"white":C.mid, fontSize:14, fontWeight:700, cursor:"pointer", fontFamily:font, transition:"all 0.2s" }}>
+            Sign In
+          </button>
+        </div>
+
         <form onSubmit={handleGateSignup} style={{ display:"flex", flexDirection:"column", gap:14 }}>
-          <input type="text" placeholder="Your full name" required style={{ padding:"13px 16px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:15, fontFamily:font, color:C.dark, outline:"none" }} />
+          {gateMode === "signup" && (
+            <input type="text" placeholder="Your full name" required style={{ padding:"13px 16px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:15, fontFamily:font, color:C.dark, outline:"none" }} />
+          )}
           <input type="email" placeholder="Your email address" required style={{ padding:"13px 16px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:15, fontFamily:font, color:C.dark, outline:"none" }} />
-          <button type="submit" style={{ padding:"14px", borderRadius:10, background:`linear-gradient(135deg,${C.teal},${C.lavender})`, border:"none", color:"white", fontSize:16, fontWeight:800, cursor:"pointer", fontFamily:font, marginTop:4 }}>Create Free Account 🧩</button>
+          <button type="submit" style={{ padding:"14px", borderRadius:10, background:`linear-gradient(135deg,${C.teal},${C.lavender})`, border:"none", color:"white", fontSize:16, fontWeight:800, cursor:"pointer", fontFamily:font, marginTop:4 }}>
+            {gateMode === "signup" ? "Create Free Account 🧩" : "Sign In →"}
+          </button>
         </form>
-        <p style={{ color:C.soft, fontSize:12, marginTop:16, lineHeight:1.6 }}>Free forever. No credit card required. By signing up you agree to our <span onClick={()=>{setGated(false);setActive("Privacy")}} style={{ color:C.teal, cursor:"pointer" }}>Privacy Policy</span> and <span onClick={()=>{setGated(false);setActive("Terms")}} style={{ color:C.teal, cursor:"pointer" }}>Terms of Service</span>.</p>
+        {gateMode === "signup" && (
+          <p style={{ color:C.soft, fontSize:12, marginTop:16, lineHeight:1.6 }}>Free forever. No credit card required. By signing up you agree to our <span onClick={()=>{setGated(false);setActive("Privacy")}} style={{ color:C.teal, cursor:"pointer" }}>Privacy Policy</span> and <span onClick={()=>{setGated(false);setActive("Terms")}} style={{ color:C.teal, cursor:"pointer" }}>Terms of Service</span>.</p>
+        )}
+        {gateMode === "login" && (
+          <p style={{ color:C.soft, fontSize:12, marginTop:16 }}>Don't have an account? <span onClick={()=>setGateMode("signup")} style={{ color:C.teal, cursor:"pointer", fontWeight:700 }}>Sign up free →</span></p>
+        )}
       </div>
     </div>
   );
