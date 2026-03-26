@@ -1158,7 +1158,7 @@ function PricingPage({ setActive, lang, t }) {
       <div style={{ maxWidth:1100, margin:"0 auto" }}>
         <div style={{ textAlign:"center", marginBottom:44 }}>
           <Pill color={C.gold}>PRICING</Pill>
-          <h1 style={{ fontFamily:serif, fontSize:mobile?28:38, fontWeight:900, color:C.dark, margin:"14px 0 10px", letterSpacing:"-0.02em" }}>Simple, <GradText a={C.teal} b={C.gold}>transparent</GradText> pricing</h1>
+          <h1 style={{ fontFamily:serif, fontSize:mobile?28:38, fontWeight:900, color:C.dark, margin:"14px 0 10px", letterSpacing:"-0.02em" }}>{lang==="es" ? "Precios simples y transparentes" : <span>Simple, <GradText a={C.teal} b={C.gold}>transparent</GradText> pricing</span>}</h1>
           <p style={{ color:C.mid, fontSize:16, maxWidth:440, margin:"0 auto 24px" }}>{lang==="es" ? "Comienza gratis. Actualiza cuando estés listo. Cancela en cualquier momento." : "Start free. Upgrade when you're ready. Cancel anytime."}</p>
           <div style={{ display:"inline-flex", background:"white", border:`1.5px solid ${C.border}`, borderRadius:12, padding:4, gap:4 }}>
             {["monthly","annual"].map(b => <button key={b} onClick={()=>setBilling(b)} style={{ background:billing===b?`linear-gradient(135deg,${C.teal},${C.sky})`:"transparent", border:"none", borderRadius:9, padding:"7px 18px", fontSize:13, fontWeight:700, color:billing===b?"white":C.mid, cursor:"pointer", fontFamily:font }}>{b==="monthly"?"Monthly":"Annual (Save 20%)"}</button>)}
@@ -1951,7 +1951,7 @@ export default function App() {
     Chat:      <AdvocateChat {...sharedProps} chatHistory={chatHistory} setChatHistory={setChatHistory} />,
     IEP:       <IEPAnalyzer {...sharedProps} iepHistory={iepHistory} setIepHistory={setIepHistory} />,
     Resources: <ResourceFinder {...sharedProps} savedResources={savedRes} setSavedResources={setSavedRes} />,
-    Blog:      <BlogHub />,
+    Blog:      <BlogHub lang={lang} t={t} />,
     Pricing:   <PricingPage setActive={setActive} lang={lang} t={t} />,
     Dashboard: <Dashboard {...sharedProps} chatHistory={chatHistory} iepHistory={iepHistory} savedResources={savedRes} waitlist={waitlist} referrals={referrals} />,
     Admin:     <AdminDashboard waitlist={waitlist} bookings={bookings} iepHistory={iepHistory} chatHistory={chatHistory} savedResources={savedRes} />,
