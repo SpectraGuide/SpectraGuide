@@ -54,6 +54,23 @@ const T = {
     blog:"Centro de Aprendizaje", pricing:"Precios", dashboard:"Panel",
     about:"Nosotros", admin:"Admin", partner:"Asociado", press:"Prensa",
     getStarted:"Comenzar Gratis", signIn:"Iniciar Sesión", signOut:"Cerrar Sesión",
+    iepTitle:"Entiende el plan de tu hijo",
+    iepSub:"Obtén un análisis en lenguaje simple con fortalezas, brechas, señales de alerta y tus derechos.",
+    iepPlaceholder:"Pega el texto del IEP o BIP de tu hijo aquí...",
+    analyzeBtn:"Analizar Documento",
+    trySample:"Probar IEP de Muestra",
+    analyzing:"Leyendo tu documento...",
+    analysisFailed:"Análisis fallido. Por favor intenta de nuevo.",
+    resourceTitle:"Encuentra apoyo cerca de ti",
+    resourceSub:"Base de datos verificada de proveedores de terapia de autismo, abogados de IEP y organizaciones de apoyo.",
+    blogTitle:"El conocimiento es tu mejor herramienta",
+    blogSub:"Artículos expertos sobre ciencia del autismo, leyes de educación especial y estrategias familiares.",
+    readMore:"Leer →",
+    upgradeTitle:"Has usado tus 10 mensajes gratis de hoy",
+    upgradeSub:"Actualiza al Plan Familiar para chat ilimitado y análisis de IEP.",
+    upgradeBtn:"Actualizar al Plan Familiar — $19/mes →",
+    limitIEP:"Has usado tus 2 análisis de IEP gratis este mes",
+    limitIEPSub:"Actualiza al Plan Familiar para análisis ilimitados.",
     home:"Inicio", 
     heroSub:"SpectraGuide es tu defensor de autismo con IA — ayudando a familias, educadores e individuos a navegar los IEPs, encontrar recursos y comprender sus derechos.",
     joinFree:"Únete Gratis", waitlistTitle:"Únete a más de 50,000 familias — acceso temprano gratuito",
@@ -434,7 +451,7 @@ Siempre reconoce las emociones primero. Explica el vocabulario técnico. Usa est
       const key = `sg_chat_${user?.email || "guest"}_${today}`;
       const count = parseInt(localStorage.getItem(key) || "0");
       if (count >= 10) {
-        setMessages(m => [...m, { role:"assistant", content:"💙 You've used your 10 free messages for today.\n\nUpgrade to the **Family Plan** for unlimited AI advocacy chat, unlimited IEP analyses, and priority support.\n\n[Upgrade Now →](/pricing)" }]);
+        setMessages(m => [...m, { role:"assistant", content:lang==="es" ? "💙 Has usado tus 10 mensajes gratis de hoy.\n\nActualiza al Plan Familiar para chat ilimitado y análisis de IEP sin límite." : "💙 You've used your 10 free messages for today.\n\nUpgrade to the **Family Plan** for unlimited AI advocacy chat, unlimited IEP analyses, and priority support.\n\n[Upgrade Now →](/pricing)" }]);
         return;
       }
       localStorage.setItem(key, (count + 1).toString());
@@ -501,7 +518,7 @@ Siempre reconoce las emociones primero. Explica el vocabulario técnico. Usa est
 }
 
 // ─── IEP ANALYZER ─────────────────────────────────────────────────────────────
-function IEPAnalyzer({ user, iepHistory, setIepHistory }) {
+function IEPAnalyzer({ user, iepHistory, setIepHistory, lang, t }) {
   const [docText, setDocText] = useState("");
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -542,8 +559,8 @@ function IEPAnalyzer({ user, iepHistory, setIepHistory }) {
       <div style={{ maxWidth:900, margin:"0 auto" }}>
         <div style={{ textAlign:"center", marginBottom:32 }}>
           <Pill color={C.lavender}>IEP & BIP ANALYZER</Pill>
-          <h1 style={{ fontFamily:serif, fontSize:mobile?28:34, fontWeight:900, color:C.dark, margin:"14px 0 10px", letterSpacing:"-0.02em" }}>Understand your child's plan</h1>
-          <p style={{ color:C.mid, fontSize:15, maxWidth:500, margin:"0 auto" }}>Get a plain-language breakdown with strengths, gaps, red flags, and your rights.</p>
+          <h1 style={{ fontFamily:serif, fontSize:mobile?28:34, fontWeight:900, color:C.dark, margin:"14px 0 10px", letterSpacing:"-0.02em" }}>{t?.iepTitle || "Understand your child's plan"}</h1>
+          <p style={{ color:C.mid, fontSize:15, maxWidth:500, margin:"0 auto" }}>{t?.iepSub || "Get a plain-language breakdown with strengths, gaps, red flags, and your rights."}</p>
         </div>
 
         {user && iepHistory.length>0 && (
@@ -1046,7 +1063,7 @@ function ResourceFinder({ user, savedResources, setSavedResources, lang }) {
 }
 
 // ─── BLOG ─────────────────────────────────────────────────────────────────────
-function BlogHub() {
+function BlogHub({ lang, t }) {
   const STATIC_POSTS = [
     {id:1,title:"Your IEP Rights: What Schools Don't Always Tell You",category:"IEP & Law",excerpt:"Every parent has powerful legal rights under IDEA — but schools aren't always required to explain them. Here's what you need to know before your next meeting.",author:"Sarah Mitchell, M.Ed.",readTime:"6 min read",emoji:"⚖️",tags:["iep","rights"]},
     {id:2,title:"ABA Therapy Explained: Benefits, Controversies & What to Ask",category:"Therapies",excerpt:"ABA is the most widely recommended autism therapy — but it's also the most debated. We break down what the research actually says and how to evaluate any program.",author:"Dr. James Okafor, BCBA-D",readTime:"8 min read",emoji:"🧠",tags:["aba","therapy"]},
@@ -1099,7 +1116,7 @@ Audience: parents, educators, autistic individuals`, [], 2000);
       <div style={{ maxWidth:1050, margin:"0 auto" }}>
         <div style={{ textAlign:"center", marginBottom:36 }}>
           <Pill color={C.sky}>LEARNING HUB</Pill>
-          <h1 style={{ fontFamily:serif, fontSize:mobile?28:34, fontWeight:900, color:C.dark, margin:"12px 0 8px", letterSpacing:"-0.02em" }}>Knowledge is your greatest tool</h1>
+          <h1 style={{ fontFamily:serif, fontSize:mobile?28:34, fontWeight:900, color:C.dark, margin:"12px 0 8px", letterSpacing:"-0.02em" }}>{t?.blogTitle || "Knowledge is your greatest tool"}</h1>
         </div>
         <div style={{ display:"flex", gap:6, flexWrap:"wrap", justifyContent:"center", marginBottom:28 }}>
           {CATS.map(c => <button key={c} onClick={()=>setCat(c)} style={{ background:cat===c?`${C.sky}18`:"transparent", border:`1.5px solid ${cat===c?C.sky:C.border}`, borderRadius:999, padding:"6px 14px", fontSize:12, fontWeight:cat===c?700:500, color:cat===c?C.sky:C.mid, cursor:"pointer", fontFamily:font }}>{c}</button>)}
