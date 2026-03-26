@@ -525,7 +525,9 @@ function IEPAnalyzer({ user, iepHistory, setIepHistory, lang, t }) {
   const [tab, setTab] = useState("analyze");
   const w = useWindowWidth(); const mobile = w<768;
 
-  const SAMPLE = `Student: Jordan M., Age 9\nDisability: Autism Spectrum Disorder\nPresent Levels: Jordan reads at 2nd grade level. Difficulty with transitions and peer interactions. Strengths in math and visual reasoning.\nAnnual Goals:\n1) Jordan will improve reading fluency from 45 to 80 wpm.\n2) Jordan will reduce transition-related meltdowns from 5/day to 1/day.\n3) Jordan will initiate peer interactions 2x per 30-min recess.\nServices: 30 min speech therapy weekly. Resource room 45 min daily. OT consult monthly.\nAccommodations: Extended time, preferential seating, visual schedules.\nParent concerns: Homework load, peer friendships, transition to 4th grade.`;
+  const SAMPLE_EN = `Student: Jordan M., Age 9\nDisability: Autism Spectrum Disorder\nPresent Levels: Jordan reads at 2nd grade level. Difficulty with transitions and peer interactions. Strengths in math and visual reasoning.\nAnnual Goals:\n1) Jordan will improve reading fluency from 45 to 80 wpm.\n2) Jordan will reduce transition-related meltdowns from 5/day to 1/day.\n3) Jordan will initiate peer interactions 2x per 30-min recess.\nServices: 30 min speech therapy weekly. Resource room 45 min daily. OT consult monthly.\nAccommodations: Extended time, preferential seating, visual schedules.\nParent concerns: Homework load, peer friendships, transition to 4th grade.`;
+  const SAMPLE_ES = `Estudiante: Jordán M., 9 años\nDiscapacidad: Trastorno del Espectro Autista\nNiveles Actuales: Jordán lee al nivel de 2do grado. Dificultad con transiciones e interacciones con compañeros. Fortalezas en matemáticas y razonamiento visual.\nMetas Anuales:\n1) Jordán mejorará la fluidez lectora de 45 a 80 palabras por minuto.\n2) Jordán reducirá las crisis relacionadas con transiciones de 5/día a 1/día.\n3) Jordán iniciará interacciones con compañeros 2 veces por recreo de 30 min.\nServicios: 30 min de terapia del habla semanal. Aula de recursos 45 min diarios. Consulta de TO mensual.\nAdaptaciones: Tiempo extendido, asiento preferencial, horarios visuales.\nPreocupaciones de los padres: Carga de tarea, amistades, transición a 4to grado.`;
+  const SAMPLE = lang === "es" ? SAMPLE_ES : SAMPLE_EN;
 
   async function analyze() {
     if (!docText.trim()) return;
@@ -588,8 +590,8 @@ function IEPAnalyzer({ user, iepHistory, setIepHistory, lang, t }) {
 
         <Card style={{ marginBottom:20 }}>
           <div style={{ display:"flex", gap:8, marginBottom:12, flexWrap:"wrap" }}>
-            <Btn variant="ghost" size="sm" onClick={() => setDocText(SAMPLE)}>✨ Try Sample IEP</Btn>
-            <Btn variant="ghost" size="sm" onClick={() => setDocText("")}>🗑️ Clear</Btn>
+            <Btn variant="ghost" size="sm" onClick={() => setDocText(SAMPLE)}>{lang==="es" ? "✨ Probar IEP de Muestra" : "✨ Try Sample IEP"}</Btn>
+            <Btn variant="ghost" size="sm" onClick={() => setDocText("")}>{lang==="es" ? "🗑️ Limpiar" : "🗑️ Clear"}</Btn>
           </div>
           <textarea value={docText} onChange={e => setDocText(e.target.value)} placeholder="Paste your IEP or BIP text here... Include goals, services, present levels, accommodations, and parent concerns." style={{ width:"100%", minHeight:200, border:`1.5px solid ${C.border}`, borderRadius:12, padding:"13px 15px", fontSize:14, fontFamily:font, background:C.cream, color:C.dark, outline:"none", resize:"vertical", lineHeight:1.65, boxSizing:"border-box" }} />
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginTop:10, flexWrap:"wrap", gap:10 }}>
@@ -1080,7 +1082,7 @@ function BlogHub({ lang, t }) {
   const [postLoading, setPostLoading] = useState(false);
   const [cat, setCat] = useState("All");
   const w = useWindowWidth(); const mobile = w<768;
-  const CATS = ["All","IEP & Law","Therapies","Parenting","School Strategies","Autistic Voices","Research","Adult Services"];
+  const CATS = lang==="es" ? ["Todo","IEP y Ley","Terapias","Crianza","Estrategias Escolares","Voces Autistas","Investigación","Servicios para Adultos"] : ["All","IEP & Law","Therapies","Parenting","School Strategies","Autistic Voices","Research","Adult Services"];
 
   async function loadPost(post) {
     setSelected({...post, content:null}); setPostLoading(true);
@@ -1131,7 +1133,7 @@ Audience: parents, educators, autistic individuals`, [], 2000);
               <p style={{ fontSize:13, color:C.mid, lineHeight:1.65, margin:"0 0 14px" }}>{post.excerpt}</p>
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
                 <div style={{ fontSize:11, color:C.soft }}>{post.author} · {post.readTime}</div>
-                <span style={{ fontSize:12, fontWeight:700, color:C.sky }}>Read →</span>
+                <span style={{ fontSize:12, fontWeight:700, color:C.sky }}>{lang==="es" ? "Leer →" : "Read →"}</span>
               </div>
             </Card>
           ))}
@@ -1142,7 +1144,7 @@ Audience: parents, educators, autistic individuals`, [], 2000);
 }
 
 // ─── PRICING ──────────────────────────────────────────────────────────────────
-function PricingPage({ setActive }) {
+function PricingPage({ setActive, lang, t }) {
   const [billing, setBilling] = useState("monthly");
   const w = useWindowWidth(); const mobile = w<768;
   const plans = [
@@ -1157,7 +1159,7 @@ function PricingPage({ setActive }) {
         <div style={{ textAlign:"center", marginBottom:44 }}>
           <Pill color={C.gold}>PRICING</Pill>
           <h1 style={{ fontFamily:serif, fontSize:mobile?28:38, fontWeight:900, color:C.dark, margin:"14px 0 10px", letterSpacing:"-0.02em" }}>Simple, <GradText a={C.teal} b={C.gold}>transparent</GradText> pricing</h1>
-          <p style={{ color:C.mid, fontSize:16, maxWidth:440, margin:"0 auto 24px" }}>Start free. Upgrade when you're ready. Cancel anytime.</p>
+          <p style={{ color:C.mid, fontSize:16, maxWidth:440, margin:"0 auto 24px" }}>{lang==="es" ? "Comienza gratis. Actualiza cuando estés listo. Cancela en cualquier momento." : "Start free. Upgrade when you're ready. Cancel anytime."}</p>
           <div style={{ display:"inline-flex", background:"white", border:`1.5px solid ${C.border}`, borderRadius:12, padding:4, gap:4 }}>
             {["monthly","annual"].map(b => <button key={b} onClick={()=>setBilling(b)} style={{ background:billing===b?`linear-gradient(135deg,${C.teal},${C.sky})`:"transparent", border:"none", borderRadius:9, padding:"7px 18px", fontSize:13, fontWeight:700, color:billing===b?"white":C.mid, cursor:"pointer", fontFamily:font }}>{b==="monthly"?"Monthly":"Annual (Save 20%)"}</button>)}
           </div>
@@ -1950,7 +1952,7 @@ export default function App() {
     IEP:       <IEPAnalyzer {...sharedProps} iepHistory={iepHistory} setIepHistory={setIepHistory} />,
     Resources: <ResourceFinder {...sharedProps} savedResources={savedRes} setSavedResources={setSavedRes} />,
     Blog:      <BlogHub />,
-    Pricing:   <PricingPage setActive={setActive} />,
+    Pricing:   <PricingPage setActive={setActive} lang={lang} t={t} />,
     Dashboard: <Dashboard {...sharedProps} chatHistory={chatHistory} iepHistory={iepHistory} savedResources={savedRes} waitlist={waitlist} referrals={referrals} />,
     Admin:     <AdminDashboard waitlist={waitlist} bookings={bookings} iepHistory={iepHistory} chatHistory={chatHistory} savedResources={savedRes} />,
     Partner:   <PartnerPage setActive={setActive} />,
