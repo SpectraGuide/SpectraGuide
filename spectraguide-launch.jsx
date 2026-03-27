@@ -1152,7 +1152,7 @@ function PricingPage({ setActive, lang, t }) {
   const w = useWindowWidth(); const mobile = w<768;
   const plans = [
     { name:"Free", price:{monthly:0,annual:0}, color:C.teal, emoji:"🌱", desc:"For families just getting started", features:["AI Advocate Chat (10 msg/day)","IEP Analyzer (2/month)","Resource Finder","Learning Hub","Email support"], cta:"Start Free" },
-    { name:"Family", price:{monthly:19,annual:15}, color:C.lavender, emoji:"💙", popular:true, desc:"For families navigating the journey", features:["Unlimited AI Advocate Chat","Unlimited IEP/BIP Analysis","Saved resources library","Chat history & notes","Monthly advocacy webinars","Priority support"], cta:"Start Family Plan" },
+    { name:"Family", price:{monthly:19,annual:15}, color:C.lavender, emoji:"💙", popular:true, desc:"For families navigating the journey", features:["Unlimited AI Advocate Chat","Unlimited IEP/BIP Analysis","Saved resources library","Chat history & notes","Priority support"], cta:"Start Family Plan" },
     { name:"Professional", price:{monthly:49,annual:39}, color:C.peach, emoji:"🎓", desc:"For educators, therapists & advocates", features:["Everything in Family","Multi-student management","Bulk IEP analysis","Team collaboration","API access","White-label options"], cta:"Start Pro Plan" },
     { name:"District", price:{monthly:299,annual:249}, color:C.rose, emoji:"🏫", desc:"For school districts & organizations", features:["Everything in Professional","Unlimited staff accounts","FERPA compliance tools","District analytics","Dedicated success manager","Custom integrations"], cta:"Contact Sales" },
   ];
@@ -1786,8 +1786,9 @@ function Footer({ setActive, t }) {
           </div>
           {[{ title:"Platform", links:[["Chat","Chat"],["IEP Analyzer","IEP"],["Resources","Resources"],["Learning Hub","Blog"]] },
             { title:"Company", links:[["About","About"],["Pricing","Pricing"],["Press Kit","Press"],["Partner","Partner"]] },
-            { title:"Get Help", links:[["Advocate Chat","Chat"],["Resource Finder","Resources"]] },
-            { title:"Legal", links:[["Privacy Policy","Privacy"],["Terms of Service","Terms"],["FERPA Compliance","FERPA"]] }
+            { title:"Get Help", links:[["Advocate Chat","Chat"],["Resource Finder","Resources"],["Contact Us","Contact"]] },
+            { title:"Legal", links:[["Privacy Policy","Privacy"],["Terms of Service","Terms"],["FERPA Compliance","FERPA"]] },
+            { title:"Contact", links:[["hello@spectraguide.org","mailto"]] }
           ].map(col => (
             <div key={col.title}>
               <div style={{ fontSize:10, fontWeight:700, color:"rgba(255,255,255,0.35)", letterSpacing:"0.1em", marginBottom:12, textTransform:"uppercase" }}>{col.title}</div>
@@ -1798,6 +1799,10 @@ function Footer({ setActive, t }) {
                   ? <div key={label} onClick={()=>setActive("Terms")} style={{ fontSize:12, color:"rgba(255,255,255,0.5)", marginBottom:8, cursor:"pointer" }}>{label}</div>
                   : tab === "FERPA"
                   ? <a key={label} href="https://studentprivacy.ed.gov/ferpa" target="_blank" rel="noopener noreferrer" style={{ fontSize:12, color:"rgba(255,255,255,0.5)", marginBottom:8, cursor:"pointer", display:"block", textDecoration:"none" }}>{label}</a>
+                  : tab === "Contact"
+                  ? <a key={label} href="mailto:hello@spectraguide.org" style={{ fontSize:12, color:"rgba(255,255,255,0.5)", marginBottom:8, cursor:"pointer", display:"block", textDecoration:"none" }}>{label}</a>
+                  : tab === "mailto"
+                  ? <a key={label} href="mailto:hello@spectraguide.org" style={{ fontSize:12, color:"rgba(255,255,255,0.5)", marginBottom:8, cursor:"pointer", display:"block", textDecoration:"none" }}>{label}</a>
                   : <div key={label} onClick={()=>setActive(tab)} style={{ fontSize:12, color:"rgba(255,255,255,0.5)", marginBottom:8, cursor:"pointer" }}>{label}</div>
               ))}
             </div>
@@ -1845,7 +1850,7 @@ function PrivacyPage({ setActive }) {
           ["5. Data Security", "We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. However, no method of transmission over the internet is 100% secure."],
           ["6. Children's Privacy", "SpectraGuide is not directed to children under 13. We do not knowingly collect personal information from children under 13. If you believe we have collected information from a child under 13, please contact us immediately."],
           ["7. Your Rights", "You have the right to access, correct, or delete your personal information at any time. You may also opt out of marketing communications. To exercise these rights, contact us at spectraguide@gmail.com."],
-          ["8. Contact Us", "If you have questions about this Privacy Policy, please contact us at spectraguide@gmail.com or visit spectraguide.org."],
+          ["8. Contact Us", "If you have questions about this Privacy Policy, please contact us at hello@spectraguide.org or visit spectraguide.org."],
         ].map(([title, text]) => (
           <div key={title} style={{ marginBottom:28 }}>
             <h2 style={{ fontSize:17, fontWeight:800, color:C.dark, marginBottom:8 }}>{title}</h2>
@@ -1916,7 +1921,43 @@ function SEOStatePage({ state, setActive }) {
 }
 
 // ─── APP ROOT ─────────────────────────────────────────────────────────────────
-const ALL_PAGES = ["Home","Chat","IEP","Resources","Blog","Pricing","Dashboard","Admin","Partner","Press","About","Privacy","Terms"];
+const ALL_PAGES = ["Home","Chat","IEP","Resources","Blog","Pricing","Dashboard","Admin","Partner","Press","About","Privacy","Terms","Contact"];
+
+function ContactPage({ setActive }) {
+  const w = useWindowWidth(); const mobile = w < 768;
+  return (
+    <div style={{ paddingTop:80, minHeight:"100vh", background:C.cream, padding:"80px 20px 60px" }}>
+      <div style={{ maxWidth:600, margin:"0 auto", textAlign:"center" }}>
+        <Pill color={C.teal}>CONTACT</Pill>
+        <h1 style={{ fontFamily:serif, fontSize:mobile?26:34, fontWeight:900, color:C.dark, margin:"16px 0 8px" }}>Get in Touch</h1>
+        <p style={{ color:C.mid, fontSize:15, lineHeight:1.7, marginBottom:40 }}>
+          We'd love to hear from you! Whether you have a question, feedback, or just want to say hello — reach out anytime.
+        </p>
+        <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+          <Card style={{ textAlign:"left" }}>
+            <div style={{ fontSize:24, marginBottom:8 }}>📧</div>
+            <div style={{ fontWeight:800, fontSize:16, color:C.dark, marginBottom:4 }}>Email Us</div>
+            <p style={{ color:C.mid, fontSize:14, marginBottom:12 }}>For general questions, support, partnerships, and press inquiries.</p>
+            <a href="mailto:spectraguide@gmail.com" style={{ color:C.teal, fontWeight:700, fontSize:15, textDecoration:"none" }}>spectraguide@gmail.com</a>
+          </Card>
+          <Card style={{ textAlign:"left" }}>
+            <div style={{ fontSize:24, marginBottom:8 }}>💬</div>
+            <div style={{ fontWeight:800, fontSize:16, color:C.dark, marginBottom:4 }}>AI Advocate Chat</div>
+            <p style={{ color:C.mid, fontSize:14, marginBottom:12 }}>Need help with an IEP or autism question right now? Our AI advocate is available 24/7.</p>
+            <Btn onClick={()=>setActive("Chat")}>Open Advocate Chat →</Btn>
+          </Card>
+          <Card style={{ textAlign:"left" }}>
+            <div style={{ fontSize:24, marginBottom:8 }}>🤝</div>
+            <div style={{ fontWeight:800, fontSize:16, color:C.dark, marginBottom:4 }}>Partnerships & Media</div>
+            <p style={{ color:C.mid, fontSize:14, marginBottom:12 }}>Interested in partnering with SpectraGuide or covering our story?</p>
+            <a href="mailto:spectraguide@gmail.com" style={{ color:C.teal, fontWeight:700, fontSize:15, textDecoration:"none" }}>spectraguide@gmail.com</a>
+          </Card>
+        </div>
+        <p style={{ color:C.soft, fontSize:13, marginTop:32 }}>Based in Kokomo, Indiana 💙 Serving families nationwide.</p>
+      </div>
+    </div>
+  );
+}
 
 export default function App() {
   useEffect(() => {
@@ -1967,6 +2008,7 @@ export default function App() {
     Press:     <PressKit />,
     About:     <AboutPage setActive={setActive} />,
     Privacy:   <PrivacyPage setActive={setActive} />,
+    Contact:   <ContactPage setActive={setActive} />,
     Terms:     <TermsPage setActive={setActive} />,
   };
 
