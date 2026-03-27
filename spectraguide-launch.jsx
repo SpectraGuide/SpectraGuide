@@ -2223,7 +2223,10 @@ export default function App() {
             <input type="text" placeholder="Your full name" required style={{ padding:"13px 16px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:15, fontFamily:font, color:C.dark, outline:"none" }} />
           )}
           <input type="email" placeholder="Your email address" required autoComplete="email" autoCorrect="off" autoCapitalize="none" style={{ padding:"13px 16px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:15, fontFamily:font, color:C.dark, outline:"none" }} />
-          <input type="password" placeholder={gateMode === "signup" ? "Create a password (min 6 characters)" : "Your password"} required autoComplete="current-password" autoCorrect="off" autoCapitalize="none" spellCheck="false" style={{ padding:"13px 16px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:15, fontFamily:font, color:C.dark, outline:"none" }} />
+          <div style={{ position:"relative" }}>
+            <input id="pwInput" type="password" placeholder={gateMode === "signup" ? "Create a password (min 6 characters)" : "Your password"} required autoComplete="current-password" autoCorrect="off" autoCapitalize="none" spellCheck="false" style={{ padding:"13px 44px 13px 16px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:15, fontFamily:font, color:C.dark, outline:"none", width:"100%", boxSizing:"border-box" }} />
+            <button type="button" onClick={()=>{ const i=document.getElementById('pwInput'); i.type=i.type==='password'?'text':'password'; }} style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", fontSize:16, color:C.soft }}>👁</button>
+          </div>
           {gateMode === "signup" && (
             <input type="password" placeholder="Confirm your password" required autoComplete="new-password" autoCorrect="off" autoCapitalize="none" spellCheck="false" style={{ padding:"13px 16px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:15, fontFamily:font, color:C.dark, outline:"none" }} />
           )}
