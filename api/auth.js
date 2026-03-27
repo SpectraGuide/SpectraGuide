@@ -4,8 +4,14 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { action, email, password, name, token, adminSecret } = req.body;
-  
+  const body = req.body;
+  const action = body.action;
+  const email = (body.email || '').toLowerCase().trim();
+  const password = (body.password || '').trim();
+  const name = (body.name || '').trim();
+  const token = (body.token || '').trim();
+  const adminSecret = body.adminSecret;
+
   const REDIS_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
   const REDIS_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 
@@ -13,7 +19,24 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Database not configured' });
   }
 
-  const clean = (s) => s ? s.trim() : s;
+  // Fully unwrap nested JSON - keeps parsing until we get a plain object
+  function deepParse(val) {
+    if (!val) return null;
+    if (typeof val === 'object' && val !== null) {
+      // If it has a nested 'value' key, unwrap it
+      if (val.value !== undefined) return deepParse(val.value);
+      return val;
+    }
+    if (typeof val === 'string') {
+      try {
+        const parsed = JSON.parse(val);
+        return deepParse(parsed);
+      } catch {
+        return val;
+      }
+    }
+    return val;
+  }
 
   async function redisGet(key) {
     const r = await fetch(`${REDIS_URL}/get/${encodeURIComponent(key)}`, {
@@ -21,24 +44,17 @@ export default async function handler(req, res) {
     });
     const data = await r.json();
     if (!data.result) return null;
-    try { return JSON.parse(data.result); } catch { return data.result; }
+    return deepParse(data.result);
   }
 
   async function redisSet(key, value) {
-    await fetch(`${REDIS_URL}/set/${encodeURIComponent(key)}`, {
+    // Store as clean JSON string - no nesting!
+    const r = await fetch(`${REDIS_URL}/set/${encodeURIComponent(key)}`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${REDIS_TOKEN}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ value: JSON.stringify(value) })
     });
-  }
-
-  async function redisSetEx(key, value, seconds) {
-    // Use SET with EX option for Upstash REST API
-    await fetch(`${REDIS_URL}/set/${encodeURIComponent(key)}`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${REDIS_TOKEN}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ value: JSON.stringify(value), ex: seconds })
-    });
+    return r.ok;
   }
 
   async function redisDel(key) {
@@ -57,128 +73,102 @@ export default async function handler(req, res) {
   }
 
   try {
-    // ADMIN OVERRIDE - force delete and recreate admin account
     if (action === 'adminOverride') {
       if (adminSecret !== 'SpectraGuide2026!') return res.status(403).json({ error: 'Unauthorized' });
-      await redisDel('user:spectraguide@gmail.com');
-      const user = {
-        email: 'spectraguide@gmail.com',
-        name: 'Tatyana Warren',
-        password: clean(password),
-        plan: 'admin',
-        created: new Date().toISOString(),
-        isAdmin: true
-      };
-      await redisSet('user:spectraguide@gmail.com', user);
-      return res.status(200).json({ success: true, user: { email: user.email, name: user.name, plan: user.plan, isAdmin: true } });
+      await redisDel(`user:${email}`);
+      const user = { email, name: name || 'Tatyana Warren', password, plan: 'admin', created: new Date().toISOString(), isAdmin: true };
+      await redisSet(`user:${email}`, user);
+      return res.status(200).json({ success: true, user: { email, name: user.name, plan: 'admin', isAdmin: true } });
     }
 
     if (action === 'signup') {
       if (!email || !password || !name) return res.status(400).json({ error: 'Missing fields' });
-      const existing = await redisGet(`user:${clean(email.toLowerCase())}`);
-      if (existing) return res.status(400).json({ error: 'An account with this email already exists. Please sign in.' });
-      const user = {
-        email: clean(email.toLowerCase()),
-        name: clean(name),
-        password: clean(password),
-        plan: 'free',
-        created: new Date().toISOString(),
-        isAdmin: clean(email.toLowerCase()) === 'spectraguide@gmail.com'
-      };
-      await redisSet(`user:${user.email}`, user);
-      // Send notification email directly
-      try {
-        await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            from: 'SpectraGuide <hello@spectraguide.org>',
-            to: ['spectraguide@gmail.com'],
-            subject: `🧩 New SpectraGuide Signup — ${name}`,
-            text: `New signup!\n\nName: ${name}\nEmail: ${email}\nPlan: free\nTime: ${new Date().toLocaleString()}`
-          })
-        });
-      } catch(emailErr) { console.error('Email error:', emailErr.message); }
-      return res.status(200).json({ success: true, user: { email: user.email, name: user.name, plan: user.plan, isAdmin: user.isAdmin } });
+      const existing = await redisGet(`user:${email}`);
+      if (existing && existing.email) return res.status(400).json({ error: 'An account with this email already exists. Please sign in.' });
+      const user = { email, name, password, plan: 'free', created: new Date().toISOString(), isAdmin: email === 'spectraguide@gmail.com' };
+      await redisSet(`user:${email}`, user);
+      fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from: 'SpectraGuide <hello@spectraguide.org>', to: ['spectraguide@gmail.com'], subject: `🧩 New Signup — ${name}`, text: `New signup!\n\nName: ${name}\nEmail: ${email}\nTime: ${new Date().toLocaleString()}` })
+      }).catch(() => {});
+      return res.status(200).json({ success: true, user: { email, name, plan: 'free', isAdmin: user.isAdmin } });
+    }
 
-    } else if (action === 'login') {
+    if (action === 'login') {
       if (!email || !password) return res.status(400).json({ error: 'Missing fields' });
-      const user = await redisGet(`user:${clean(email.toLowerCase())}`);
-      if (!user) return res.status(400).json({ error: 'No account found with this email. Please sign up.' });
-      if (clean(user.password) !== clean(password)) return res.status(400).json({ error: 'Incorrect password. Please try again.' });
+      const user = await redisGet(`user:${email}`);
+      if (!user || !user.email) return res.status(400).json({ error: 'No account found with this email. Please sign up.' });
+      const storedPw = (user.password || '').trim();
+      if (storedPw !== password) return res.status(400).json({ error: 'Incorrect password. Please try again.' });
       return res.status(200).json({ success: true, user: { email: user.email, name: user.name, plan: user.plan, isAdmin: user.isAdmin } });
+    }
 
-    } else if (action === 'forgotPassword') {
+    if (action === 'changePassword') {
+      if (!email || !password) return res.status(400).json({ error: 'Missing fields' });
+      const user = await redisGet(`user:${email}`);
+      if (!user || !user.email) return res.status(400).json({ error: 'User not found' });
+      user.password = password;
+      await redisSet(`user:${email}`, user);
+      return res.status(200).json({ success: true });
+    }
+
+    if (action === 'forgotPassword') {
       if (!email) return res.status(400).json({ error: 'Missing email' });
-      const user = await redisGet(`user:${clean(email.toLowerCase())}`);
-      if (!user) return res.status(400).json({ error: 'No account found with this email.' });
+      const user = await redisGet(`user:${email}`);
+      if (!user || !user.email) return res.status(400).json({ error: 'No account found with this email.' });
       const resetToken = Math.random().toString(36).slice(2) + Date.now().toString(36);
-      await redisSetEx(`reset:${resetToken}`, { email: clean(email.toLowerCase()) }, 3600);
+      await redisSet(`reset:${resetToken}`, { email });
       const resetUrl = `https://spectraguide.org?reset=${resetToken}`;
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          from: 'SpectraGuide <hello@spectraguide.org>',
-          to: [clean(email)],
-          subject: '🧩 Reset your SpectraGuide password',
-          text: `Hi ${user.name},\n\nClick below to reset your password (expires in 1 hour):\n\n${resetUrl}\n\n— SpectraGuide Team`
-        })
+        body: JSON.stringify({ from: 'SpectraGuide <hello@spectraguide.org>', to: [email], subject: '🧩 Reset your SpectraGuide password', text: `Hi ${user.name},\n\nClick to reset your password:\n\n${resetUrl}\n\nExpires in 1 hour.\n\n— SpectraGuide Team` })
       });
       return res.status(200).json({ success: true });
+    }
 
-    } else if (action === 'resetPassword') {
+    if (action === 'resetPassword') {
       if (!token || !password) return res.status(400).json({ error: 'Missing fields' });
-      const rawResetData = await redisGet(`reset:${token}`);
-      const resetData = typeof rawResetData === 'string' ? { email: rawResetData } : rawResetData;
-      console.log('Reset token lookup:', token, 'found:', !!resetData);
+      const resetData = await redisGet(`reset:${token}`);
       if (!resetData) return res.status(400).json({ error: 'Reset link expired. Please request a new one.' });
-      console.log('Reset email:', resetData.email);
-      const user = await redisGet(`user:${resetData.email}`);
-      console.log('User found:', !!user);
-      if (!user) {
-        // Create account if it doesn't exist yet (for Stripe customers)
-        const newUser = {
-          email: resetData.email,
-          name: (resetData.email || '').split('@')[0] || 'User',
-          password: clean(password),
-          plan: 'free',
-          created: new Date().toISOString(),
-          isAdmin: resetData.email === 'spectraguide@gmail.com'
-        };
-        await redisSet(`user:${resetData.email}`, newUser);
+      const resetEmail = typeof resetData === 'string' ? resetData : resetData.email;
+      const user = await redisGet(`user:${resetEmail}`);
+      if (!user || !user.email) {
+        const newUser = { email: resetEmail, name: resetEmail.split('@')[0], password, plan: 'free', created: new Date().toISOString(), isAdmin: resetEmail === 'spectraguide@gmail.com' };
+        await redisSet(`user:${resetEmail}`, newUser);
         await redisDel(`reset:${token}`);
         return res.status(200).json({ success: true, user: { email: newUser.email, name: newUser.name, plan: newUser.plan, isAdmin: newUser.isAdmin } });
       }
-      user.password = clean(password);
-      await redisSet(`user:${resetData.email}`, user);
+      user.password = password;
+      await redisSet(`user:${resetEmail}`, user);
       await redisDel(`reset:${token}`);
       return res.status(200).json({ success: true, user: { email: user.email, name: user.name, plan: user.plan, isAdmin: user.isAdmin } });
+    }
 
-    } else if (action === 'changePassword') {
-      if (!email || !password) return res.status(400).json({ error: 'Missing fields' });
-      const user = await redisGet(`user:${clean(email.toLowerCase())}`);
-      if (!user) return res.status(400).json({ error: 'User not found' });
-      user.password = clean(password);
-      await redisSet(`user:${clean(email.toLowerCase())}`, user);
-      return res.status(200).json({ success: true });
-
-    } else if (action === 'updatePlan') {
+    if (action === 'updatePlan') {
       if (!email) return res.status(400).json({ error: 'Missing email' });
-      const user = await redisGet(`user:${clean(email.toLowerCase())}`);
-      if (!user) return res.status(400).json({ error: 'User not found' });
-      user.plan = req.body.plan;
-      await redisSet(`user:${clean(email.toLowerCase())}`, user);
+      const user = await redisGet(`user:${email}`);
+      if (!user || !user.email) return res.status(400).json({ error: 'User not found' });
+      user.plan = body.plan;
+      await redisSet(`user:${email}`, user);
       return res.status(200).json({ success: true });
+    }
 
-    } else if (action === 'listUsers') {
+    if (action === 'listUsers') {
       const keys = await redisKeys('user:*');
       const users = {};
       await Promise.all(keys.map(async (key) => {
         const user = await redisGet(key);
-        if (user) users[user.email] = { name: user.name, plan: user.plan, created: user.created };
+        if (user && user.email) users[user.email] = { name: user.name, plan: user.plan, created: user.created };
       }));
       return res.status(200).json({ success: true, users });
+    }
+
+    if (action === 'deleteUser') {
+      if (adminSecret !== 'sg_admin_2026') return res.status(403).json({ error: 'Unauthorized' });
+      await redisDel(`user:${email}`);
+      return res.status(200).json({ success: true });
     }
 
     return res.status(400).json({ error: 'Invalid action' });
