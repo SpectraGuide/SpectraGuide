@@ -4,7 +4,8 @@
     "api/checkout.js": { "maxDuration": 30 },
     "api/notify.js": { "maxDuration": 10 },
     "api/auth.js": { "maxDuration": 10 },
-    "api/welcome.js": { "maxDuration": 10 }
+    "api/welcome.js": { "maxDuration": 10 },
+    "api/webhook.js": { "maxDuration": 10 }
   },
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
