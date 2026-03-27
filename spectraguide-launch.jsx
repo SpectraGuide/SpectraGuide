@@ -276,13 +276,12 @@ function Nav({ active, setActive, user, setUser, lang, setLang, t }) {
 function HomePage({ setActive, waitlist, setWaitlist, t }) {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
-  const [refCode] = useState(() => Math.random().toString(36).slice(2,8).toUpperCase());
   const w = useWindowWidth();
   const mobile = w < 768;
 
   function joinWaitlist() {
     if (!email.includes("@")) return;
-    setWaitlist([...waitlist, { email, date:new Date().toLocaleDateString(), ref:refCode }]);
+    setWaitlist([...waitlist, { email, date:new Date().toLocaleDateString() }]);
     setSubmitted(true);
   }
 
@@ -329,8 +328,7 @@ function HomePage({ setActive, waitlist, setWaitlist, t }) {
             <div style={{ textAlign:"center" }}>
               <div style={{ fontSize:30, marginBottom:8 }}>🎉</div>
               <div style={{ fontWeight:800, fontSize:16, color:C.dark }}>You're on the list!</div>
-              <div style={{ color:C.mid, fontSize:13, marginTop:6 }}>Share your referral link and earn a free month:</div>
-              <div style={{ background:C.cream, borderRadius:9, padding:"8px 14px", marginTop:10, fontSize:12, fontWeight:700, color:C.teal, letterSpacing:"0.04em" }}>spectraguide.com/ref/{refCode}</div>
+
             </div>
           ) : (
             <>
@@ -1298,7 +1296,7 @@ function BookingPage({ bookings, setBookings }) {
 }
 
 // ─── DASHBOARD ────────────────────────────────────────────────────────────────
-function Dashboard({ user, setUser, chatHistory, iepHistory, savedResources, waitlist, referrals, setActive }) {
+function Dashboard({ user, setUser, chatHistory, iepHistory, savedResources, waitlist, setActive }) {
   const [mode, setMode] = useState("signin");
   const [form, setForm] = useState({ name:"", email:"", password:"" });
   const [err, setErr] = useState("");
@@ -1357,28 +1355,8 @@ function Dashboard({ user, setUser, chatHistory, iepHistory, savedResources, wai
         </Card>
 
         <div style={{ display:"grid", gridTemplateColumns:mobile?"1fr 1fr":"repeat(4,1fr)", gap:14, marginBottom:22 }}>
-          {[{ icon:"💬", label:"Chat Messages", value:chatHistory.filter(m=>m.role==="user").length, color:C.teal },{ icon:"📋", label:"IEPs Analyzed", value:iepHistory.length, color:C.lavender },{ icon:"❤️", label:"Saved Resources", value:savedResources.length, color:C.rose },{ icon:"👥", label:"Referrals", value:referrals, color:C.gold }].map(s => (
-            <Card key={s.label} style={{ textAlign:"center" }}>
-              <div style={{ fontSize:22, marginBottom:7 }}>{s.icon}</div>
-              <div style={{ fontFamily:serif, fontSize:26, fontWeight:900, color:s.color }}>{s.value}</div>
-              <div style={{ fontSize:11, color:C.soft, marginTop:3 }}>{s.label}</div>
-            </Card>
-          ))}
-        </div>
-
-        {/* Referral Program */}
-        <Card style={{ marginBottom:22, background:`linear-gradient(135deg,${C.teal}12,${C.lavender}12)` }}>
-          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:12 }}>
-            <div>
-              <div style={{ fontWeight:800, fontSize:15, color:C.dark, marginBottom:4 }}>🎁 Refer a Friend — Earn a Free Month</div>
-              <div style={{ fontSize:13, color:C.mid }}>Share your link. For every friend who upgrades, you both get one free month of Family plan.</div>
-            </div>
-            <div style={{ display:"flex", gap:8, alignItems:"center" }}>
-              <div style={{ background:"white", borderRadius:9, padding:"8px 14px", fontSize:12, fontWeight:700, color:C.teal, border:`1.5px solid ${C.teal}33` }}>{refLink}</div>
-              <Btn size="sm" onClick={()=>navigator.clipboard?.writeText(`https://${refLink}`)}>Copy</Btn>
-            </div>
-          </div>
-        </Card>
+          {[{ icon:"💬", label:"Chat Messages", value:chatHistory.filter(m=>m.role==="user").length, color:C.teal },{ icon:"📋", label:"IEPs Analyzed", value:iepHistory.length, color:C.lavender },{ icon:"❤️", label:"Saved Resources", value:savedResources.length, color:C.rose }].map(s => (
+            
 
         <div style={{ display:"grid", gridTemplateColumns:mobile?"1fr":"1fr 1fr", gap:18 }}>
           <Card>
@@ -1979,7 +1957,7 @@ export default function App() {
   const [savedRes,    setSavedRes]        = useLocalStore("sg_res_v2",  []);
   const [waitlist,    setWaitlist]        = useLocalStore("sg_wait_v2", []);
   const [bookings,    setBookings]        = useLocalStore("sg_book_v2", []);
-  const [referrals]                       = useState(3);
+
 
   const t = T[lang];
 
@@ -2002,7 +1980,7 @@ export default function App() {
     Resources: <ResourceFinder {...sharedProps} savedResources={savedRes} setSavedResources={setSavedRes} />,
     Blog:      <BlogHub lang={lang} t={t} />,
     Pricing:   <PricingPage setActive={setActive} lang={lang} t={t} />,
-    Dashboard: <Dashboard {...sharedProps} chatHistory={chatHistory} iepHistory={iepHistory} savedResources={savedRes} waitlist={waitlist} referrals={referrals} />,
+    Dashboard: <Dashboard {...sharedProps} chatHistory={chatHistory} iepHistory={iepHistory} savedResources={savedRes} waitlist={waitlist} />,
     Admin:     <AdminDashboard waitlist={waitlist} bookings={bookings} iepHistory={iepHistory} chatHistory={chatHistory} savedResources={savedRes} />,
     Partner:   <PartnerPage setActive={setActive} />,
     Press:     <PressKit />,
