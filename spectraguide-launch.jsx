@@ -76,7 +76,7 @@ const T = {
     limitIEPSub:"Actualiza al Plan Familiar para análisis ilimitados.",
     home:"Inicio", 
     heroSub:"SpectraGuide es tu defensor de autismo con IA — ayudando a familias, educadores e individuos a navegar los IEPs, encontrar recursos y comprender sus derechos.",
-    joinFree:"Únete Gratis", waitlistTitle:"Únete a más de 50,000 familias — acceso temprano gratuito",
+    joinFree:"Únete Gratis", waitlistTitle:"Únete a nuestra comunidad — acceso temprano gratuito",
     waitlistSub:"Recibe notificaciones sobre nuevas funciones, recursos y consejos de defensa.",
     yourEmail:"tu@correo.com", poweredBy:"Impulsado por",
   }
@@ -1341,7 +1341,7 @@ function Dashboard({ user, setUser, chatHistory, iepHistory, savedResources, wai
     </div>
   );
 
-  const refLink = `spectraguide.com/ref/${user.email.split("@")[0].toUpperCase()}`;
+
 
   return (
     <div style={{ paddingTop:80, minHeight:"100vh", background:C.cream, padding:"80px 20px 60px" }}>
@@ -1362,9 +1362,15 @@ function Dashboard({ user, setUser, chatHistory, iepHistory, savedResources, wai
           </div>
         </Card>
 
-        <div style={{ display:"grid", gridTemplateColumns:mobile?"1fr 1fr":"repeat(4,1fr)", gap:14, marginBottom:22 }}>
+        <div style={{ display:"grid", gridTemplateColumns:mobile?"1fr 1fr":"repeat(3,1fr)", gap:14, marginBottom:22 }}>
           {[{ icon:"💬", label:"Chat Messages", value:chatHistory.filter(m=>m.role==="user").length, color:C.teal },{ icon:"📋", label:"IEPs Analyzed", value:iepHistory.length, color:C.lavender },{ icon:"❤️", label:"Saved Resources", value:savedResources.length, color:C.rose }].map(s => (
-            
+            <Card key={s.label} style={{ textAlign:"center" }}>
+              <div style={{ fontSize:22, marginBottom:8 }}>{s.icon}</div>
+              <div style={{ fontFamily:serif, fontSize:26, fontWeight:900, color:s.color }}>{s.value}</div>
+              <div style={{ fontSize:11, color:C.soft, marginTop:2 }}>{s.label}</div>
+            </Card>
+          ))}
+        </div>
 
         <div style={{ display:"grid", gridTemplateColumns:mobile?"1fr":"1fr 1fr", gap:18 }}>
           <Card>
@@ -1589,7 +1595,7 @@ function PartnerPage({ setActive }) {
 // ─── PRESS KIT ────────────────────────────────────────────────────────────────
 function PressKit() {
   const w = useWindowWidth(); const mobile = w<768;
-  const stats = [{ n:"50,000+", l:"Families on Platform" },{ n:"12,000+", l:"IEPs Analyzed" },{ n:"80+", l:"Countries Served" },{ n:"98%", l:"User Satisfaction" },{ n:"$0", l:"Paid User Acquisition" },{ n:"AI Powered", l:"AI Model Powering SpectraGuide" }];
+  const stats = [{ n:"Free", l:"Always Free to Start" },{ n:"24/7", l:"AI Advocate Available" },{ n:"50+", l:"States with Resources" },{ n:"💙", l:"Built by an Autism Mom" }];
   const facts = ["1 in 36 children in the US is diagnosed with autism spectrum disorder (CDC, 2023)","The average special education attorney costs $5,000–$15,000 per dispute","70% of autism families report difficulty finding quality local resources","SpectraGuide is the only AI-native, all-in-one autism advocacy platform on the market","Founded to democratize access to special education advocacy, regardless of income"];
   const coverage = [{ outlet:"TechCrunch", headline:"SpectraGuide Is Using AI to Level the Playing Field for Autism Families", date:"Jan 2025" },{ outlet:"Wired", headline:"The AI That's Helping Parents Fight Back Against Broken IEPs", date:"Feb 2025" },{ outlet:"EdSurge", headline:"SpectraGuide: A New Tool That Decodes Special Education Law for Families", date:"Mar 2025" }];
 
