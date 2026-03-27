@@ -2130,7 +2130,6 @@ export default function App() {
           <button type="submit" disabled={gateLoading} style={{ padding:"14px", borderRadius:10, background:`linear-gradient(135deg,${C.teal},${C.lavender})`, border:"none", color:"white", fontSize:16, fontWeight:800, cursor:gateLoading?"not-allowed":"pointer", fontFamily:font, marginTop:4, opacity:gateLoading?0.7:1 }}>
             {gateLoading ? "Please wait..." : gateMode === "signup" ? "Create Free Account 🧩" : "Sign In →"}
           </button>
-        </form>
         </form>}
         {gateMode === "signup" && (
           <p style={{ color:C.soft, fontSize:12, marginTop:16, lineHeight:1.6 }}>Free forever. No credit card required. By signing up you agree to our <span onClick={()=>{setGated(false);setActive("Privacy")}} style={{ color:C.teal, cursor:"pointer" }}>Privacy Policy</span> and <span onClick={()=>{setGated(false);setActive("Terms")}} style={{ color:C.teal, cursor:"pointer" }}>Terms of Service</span>.</p>
