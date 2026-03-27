@@ -155,6 +155,14 @@ export default async function handler(req, res) {
       await redisDel(`reset:${token}`);
       return res.status(200).json({ success: true, user: { email: user.email, name: user.name, plan: user.plan, isAdmin: user.isAdmin } });
 
+    } else if (action === 'changePassword') {
+      if (!email || !password) return res.status(400).json({ error: 'Missing fields' });
+      const user = await redisGet(`user:${clean(email.toLowerCase())}`);
+      if (!user) return res.status(400).json({ error: 'User not found' });
+      user.password = clean(password);
+      await redisSet(`user:${clean(email.toLowerCase())}`, user);
+      return res.status(200).json({ success: true });
+
     } else if (action === 'updatePlan') {
       if (!email) return res.status(400).json({ error: 'Missing email' });
       const user = await redisGet(`user:${clean(email.toLowerCase())}`);
