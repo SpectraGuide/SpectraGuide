@@ -285,10 +285,10 @@ function HomePage({ setActive, waitlist, setWaitlist, t }) {
     setSubmitted(true);
     // Send welcome email
     try {
-      await fetch("/api/welcome", {
+      await fetch("/api/notify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ type: "waitlist", name: email, email: email, plan: "waitlist" })
       });
     } catch(e) { console.error("Welcome email error:", e); }
   }
@@ -330,25 +330,7 @@ function HomePage({ setActive, waitlist, setWaitlist, t }) {
           <Btn size="lg" onClick={() => setActive("Chat")}>💬 {t.start}</Btn>
           <Btn size="lg" variant="secondary" onClick={() => setActive("IEP")}>📋 {t.analyzeIEP}</Btn>
         </div>
-        {/* Email capture */}
-        <div style={{ background:"white", borderRadius:18, padding:"22px 26px", boxShadow:"0 8px 40px rgba(0,0,0,0.09)", maxWidth:460, width:"100%", border:`1px solid ${C.border}` }}>
-          {submitted ? (
-            <div style={{ textAlign:"center" }}>
-              <div style={{ fontSize:30, marginBottom:8 }}>🎉</div>
-              <div style={{ fontWeight:800, fontSize:16, color:C.dark }}>You're on the list!</div>
-              <div style={{ color:C.mid, fontSize:13, marginTop:6 }}>We'll keep you updated on new features and advocacy tips. 💙</div>
-            </div>
-          ) : (
-            <>
-              <div style={{ fontWeight:700, fontSize:14, color:C.dark, marginBottom:4 }}>{t.waitlistTitle}</div>
-              <div style={{ color:C.soft, fontSize:12, marginBottom:14 }}>{t.waitlistSub}</div>
-              <div style={{ display:"flex", gap:9 }}>
-                <Input value={email} onChange={e => setEmail(e.target.value)} placeholder={t.yourEmail} type="email" style={{ flex:1 }} />
-                <Btn onClick={joinWaitlist} disabled={!email.includes("@")}>{t.joinFree}</Btn>
-              </div>
-            </>
-          )}
-        </div>
+
       </section>
 
       {/* STATS */}
@@ -2102,6 +2084,14 @@ export default function App() {
       }
       setUser(data.user);
       setGated(false);
+      // Send welcome email for new signups
+      if (gateMode === "signup") {
+        fetch("/api/welcome", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: emailVal })
+        }).catch(() => {});
+      }
     } catch(err) {
       setGateError("Connection error. Please try again.");
     }
