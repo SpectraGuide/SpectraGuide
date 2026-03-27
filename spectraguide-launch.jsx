@@ -1290,7 +1290,31 @@ function Dashboard({ user, setUser, chatHistory, iepHistory, savedResources, wai
   const [mode, setMode] = useState("signin");
   const [form, setForm] = useState({ name:"", email:"", password:"" });
   const [err, setErr] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [pwForm, setPwForm] = useState({ newPw:"", confirmPw:"" });
+  const [pwMsg, setPwMsg] = useState("");
   const w = useWindowWidth(); const mobile = w<768;
+
+  async function handleChangePassword() {
+    if (!pwForm.newPw || pwForm.newPw.length < 6) { setPwMsg("Password must be at least 6 characters."); return; }
+    if (pwForm.newPw !== pwForm.confirmPw) { setPwMsg("Passwords do not match."); return; }
+    try {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "changePassword", email: user.email, password: pwForm.newPw })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setPwMsg("✅ Password changed successfully!");
+        setTimeout(() => { setChangingPassword(false); setPwForm({ newPw:"", confirmPw:"" }); setPwMsg(""); }, 2000);
+      } else {
+        setPwMsg("❌ " + (data.error || "Something went wrong."));
+      }
+    } catch(e) {
+      setPwMsg("❌ Connection error. Please try again.");
+    }
+  }
 
   function handleAuth() {
     if (!form.email.includes("@")) return setErr("Enter a valid email.");
@@ -1328,6 +1352,25 @@ function Dashboard({ user, setUser, chatHistory, iepHistory, savedResources, wai
   return (
     <div style={{ paddingTop:80, minHeight:"100vh", background:C.cream, padding:"80px 20px 60px" }}>
       <div style={{ maxWidth:960, margin:"0 auto" }}>
+
+        {/* Change Password Modal */}
+        {changingPassword && (
+          <div style={{ position:"fixed", top:0, left:0, right:0, bottom:0, background:"rgba(0,0,0,0.5)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center", padding:20 }}>
+            <Card style={{ maxWidth:400, width:"100%", padding:32 }}>
+              <h3 style={{ fontFamily:serif, fontSize:20, fontWeight:800, color:C.dark, marginBottom:20 }}>🔑 Change Password</h3>
+              <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+                <input type="password" placeholder="New password (min 6 characters)" value={pwForm.newPw} onChange={e=>setPwForm({...pwForm,newPw:e.target.value})} autoCorrect="off" autoCapitalize="none" style={{ padding:"12px 14px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:14, fontFamily:font }} />
+                <input type="password" placeholder="Confirm new password" value={pwForm.confirmPw} onChange={e=>setPwForm({...pwForm,confirmPw:e.target.value})} autoCorrect="off" autoCapitalize="none" style={{ padding:"12px 14px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:14, fontFamily:font }} />
+                {pwMsg && <div style={{ fontSize:13, color: pwMsg.startsWith("✅") ? C.teal : C.rose, fontWeight:600 }}>{pwMsg}</div>}
+                <div style={{ display:"flex", gap:10 }}>
+                  <Btn onClick={handleChangePassword} style={{ flex:1 }}>Save Password</Btn>
+                  <Btn variant="ghost" onClick={()=>{ setChangingPassword(false); setPwForm({ newPw:"", confirmPw:"" }); setPwMsg(""); }}>Cancel</Btn>
+                </div>
+              </div>
+            </Card>
+          </div>
+        )}
+
         <Card style={{ marginBottom:22, background:`linear-gradient(135deg,${C.dark},#3D3860)` }}>
           <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:14 }}>
             <div style={{ display:"flex", alignItems:"center", gap:16 }}>
@@ -1337,8 +1380,9 @@ function Dashboard({ user, setUser, chatHistory, iepHistory, savedResources, wai
                 <div style={{ fontSize:12, color:"rgba(255,255,255,0.55)", marginTop:2 }}>{user.email} · {user.plan} Plan · Joined {user.joined}</div>
               </div>
             </div>
-            <div style={{ display:"flex", gap:8 }}>
-              <Btn variant="gold" size="sm" onClick={()=>setActive("Pricing")}>Upgrade 💎</Btn>
+            <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+              {user.plan === "free" || user.plan === "Free" ? <Btn variant="gold" size="sm" onClick={()=>setActive("Pricing")}>Upgrade 💎</Btn> : null}
+              <Btn variant="ghost" size="sm" onClick={()=>setChangingPassword(true)}>🔑 Change Password</Btn>
               <Btn variant="danger" size="sm" onClick={()=>setUser(null)}>Sign Out</Btn>
             </div>
           </div>
