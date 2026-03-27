@@ -46,7 +46,7 @@ const T = {
     getStarted:"Get Started Free", signIn:"Sign In", signOut:"Sign Out",
     home:"Home", 
     heroSub:"SpectraGuide is your AI-powered autism advocate — helping families, educators, and individuals navigate IEPs, find resources, and understand their rights.",
-    joinFree:"Join Free — It's Free", waitlistTitle:"Join 50,000+ families — free early access",
+    joinFree:"Join Free — It's Free", waitlistTitle:"Stay updated on new features & advocacy tips",
     waitlistSub:"Get notified about new features, resources, and advocacy tips.",
     yourEmail:"your@email.com", poweredBy:"Powered by",
   },
@@ -294,7 +294,7 @@ function HomePage({ setActive, waitlist, setWaitlist, t }) {
     { icon:"👤", label:"Personal Dashboard", desc:"Save chats, analyses, resources, and notes in one place.", color:C.gold, tab:"Dashboard" },
   ];
 
-  const stats = [{ v:"50K+",l:"Families" },{ v:"12K+",l:"IEPs Analyzed" },{ v:"80+",l:"Countries" },{ v:"98%",l:"Satisfaction" }];
+  const stats = [{ v:"Free",l:"Always Free to Start" },{ v:"24/7",l:"AI Advocate Access" },{ v:"50+",l:"States with Resources" },{ v:"100%",l:"Family Focused" }];
 
   const testimonials = [
     { q:"SpectraGuide helped me understand my son's IEP in ways his school never explained. I walked in empowered.", n:"Maria T.", r:"Mom of a 7-year-old", a:"👩" },
@@ -328,7 +328,7 @@ function HomePage({ setActive, waitlist, setWaitlist, t }) {
             <div style={{ textAlign:"center" }}>
               <div style={{ fontSize:30, marginBottom:8 }}>🎉</div>
               <div style={{ fontWeight:800, fontSize:16, color:C.dark }}>You're on the list!</div>
-
+              <div style={{ color:C.mid, fontSize:13, marginTop:6 }}>We'll keep you updated on new features and advocacy tips. 💙</div>
             </div>
           ) : (
             <>
