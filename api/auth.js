@@ -6,18 +6,11 @@ export default async function handler(req, res) {
 
   const { action, email, password, name } = req.body;
   
-  // Try both possible variable name formats
   const REDIS_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
   const REDIS_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 
-  console.log('REDIS_URL exists:', !!REDIS_URL);
-  console.log('REDIS_TOKEN exists:', !!REDIS_TOKEN);
-
   if (!REDIS_URL || !REDIS_TOKEN) {
-    return res.status(500).json({ 
-      error: 'Database not configured',
-      available: Object.keys(process.env).filter(k => k.includes('KV') || k.includes('REDIS') || k.includes('UPSTASH'))
-    });
+    return res.status(500).json({ error: 'Database not configured' });
   }
 
   async function redisGet(key) {
@@ -67,6 +60,24 @@ export default async function handler(req, res) {
       if (!user) return res.status(400).json({ error: 'No account found with this email. Please sign up.' });
       if (user.password !== password) return res.status(400).json({ error: 'Incorrect password. Please try again.' });
       return res.status(200).json({ success: true, user: { email: user.email, name: user.name, plan: user.plan, isAdmin: user.isAdmin } });
+
+    } else if (action === 'resetPassword') {
+      // Admin-only password reset
+      if (!email || !password) return res.status(400).json({ error: 'Missing fields' });
+      const user = await redisGet(`user:${email.toLowerCase()}`);
+      if (!user) return res.status(400).json({ error: 'User not found' });
+      user.password = password;
+      await redisSet(`user:${email.toLowerCase()}`, user);
+      return res.status(200).json({ success: true, message: 'Password updated!' });
+
+    } else if (action === 'deleteUser') {
+      // Delete user so they can re-register
+      if (!email) return res.status(400).json({ error: 'Missing email' });
+      await fetch(`${REDIS_URL}/del/${encodeURIComponent(`user:${email.toLowerCase()}`)}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${REDIS_TOKEN}` }
+      });
+      return res.status(200).json({ success: true, message: 'User deleted' });
 
     } else if (action === 'updatePlan') {
       if (!email) return res.status(400).json({ error: 'Missing email' });
