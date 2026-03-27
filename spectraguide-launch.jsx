@@ -1439,7 +1439,11 @@ function AdminDashboard({ waitlist, bookings, iepHistory, chatHistory, savedReso
   const totalChats = chatHistory.filter(m=>m.role==="user").length + 48291;
 
   // Load real signups from localStorage
-  const allAccounts = (() => { try { return Object.entries(JSON.parse(localStorage.getItem("sg_accounts") || "{}")); } catch { return []; } })();
+  const [allAccounts, setAllAccounts] = useState([]);
+  useEffect(() => {
+    fetch("/api/auth", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ action:"listUsers" }) })
+      .then(r=>r.json()).then(d=>{ if(d.users) setAllAccounts(Object.entries(d.users)); }).catch(()=>{});
+  }, []);
   const recentSignups = allAccounts.slice(-10).reverse().map(([email, data]) => ({ type:"signup", text:`New signup: ${data.name} (${email})`, time:data.created || "Today", color:C.teal, plan: data.plan || "free" }));
 
   const recentActivity = [
@@ -1974,41 +1978,49 @@ export default function App() {
   }, [user]);
 
   const [gateError, setGateError] = useState("");
+  const [gateLoading, setGateLoading] = useState(false);
 
-  function handleGateSignup(e) {
+  async function handleGateSignup(e) {
     e.preventDefault();
     setGateError("");
+    setGateLoading(true);
     const emailVal = e.target.querySelector('input[type="email"]').value;
     const passwords = e.target.querySelectorAll('input[type="password"]');
     const passwordVal = passwords[0]?.value || "";
     const nameVal = e.target.querySelector('input[type="text"]')?.value || "";
 
-    if (!emailVal.includes("@")) { setGateError("Please enter a valid email address."); return; }
-    if (!passwordVal || passwordVal.length < 6) { setGateError("Password must be at least 6 characters."); return; }
+    if (!emailVal.includes("@")) { setGateError("Please enter a valid email address."); setGateLoading(false); return; }
+    if (!passwordVal || passwordVal.length < 6) { setGateError("Password must be at least 6 characters."); setGateLoading(false); return; }
 
     if (gateMode === "signup") {
-      if (!nameVal) { setGateError("Please enter your full name."); return; }
+      if (!nameVal) { setGateError("Please enter your full name."); setGateLoading(false); return; }
       const confirmVal = passwords[1]?.value || "";
-      if (passwordVal !== confirmVal) { setGateError("Passwords do not match."); return; }
-      try {
-        const accounts = JSON.parse(localStorage.getItem("sg_accounts") || "{}");
-        if (accounts[emailVal]) { setGateError("An account with this email already exists. Please sign in."); setGateMode("login"); return; }
-        accounts[emailVal] = { name: nameVal, password: passwordVal, plan: "free", created: new Date().toISOString() };
-        localStorage.setItem("sg_accounts", JSON.stringify(accounts));
-      } catch {}
-      setUser({ email: emailVal, name: nameVal, plan: "free", isAdmin: emailVal.toLowerCase() === "spectraguide@gmail.com" });
-      setGated(false);
-      // Notify Tatyana of new signup
-      fetch("/api/notify", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ type:"signup", name: nameVal, email: emailVal, plan:"free" }) }).catch(()=>{});
-    } else {
-      try {
-        const accounts = JSON.parse(localStorage.getItem("sg_accounts") || "{}");
-        if (!accounts[emailVal]) { setGateError("No account found with this email. Please sign up."); return; }
-        if (accounts[emailVal].password !== passwordVal) { setGateError("Incorrect password. Please try again."); return; }
-        setUser({ email: emailVal, name: accounts[emailVal].name, plan: accounts[emailVal].plan || "free", isAdmin: emailVal.toLowerCase() === "spectraguide@gmail.com" });
-        setGated(false);
-      } catch { setGateError("Something went wrong. Please try again."); }
+      if (passwordVal !== confirmVal) { setGateError("Passwords do not match."); setGateLoading(false); return; }
     }
+
+    try {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          action: gateMode === "signup" ? "signup" : "login",
+          email: emailVal, 
+          password: passwordVal, 
+          name: nameVal 
+        })
+      });
+      const data = await res.json();
+      if (!data.success) {
+        setGateError(data.error || "Something went wrong. Please try again.");
+        setGateLoading(false);
+        return;
+      }
+      setUser(data.user);
+      setGated(false);
+    } catch(err) {
+      setGateError("Connection error. Please try again.");
+    }
+    setGateLoading(false);
   }
 
   if (gated) return (
@@ -2048,8 +2060,8 @@ export default function App() {
               ⚠️ {gateError}
             </div>
           )}
-          <button type="submit" style={{ padding:"14px", borderRadius:10, background:`linear-gradient(135deg,${C.teal},${C.lavender})`, border:"none", color:"white", fontSize:16, fontWeight:800, cursor:"pointer", fontFamily:font, marginTop:4 }}>
-            {gateMode === "signup" ? "Create Free Account 🧩" : "Sign In →"}
+          <button type="submit" disabled={gateLoading} style={{ padding:"14px", borderRadius:10, background:`linear-gradient(135deg,${C.teal},${C.lavender})`, border:"none", color:"white", fontSize:16, fontWeight:800, cursor:gateLoading?"not-allowed":"pointer", fontFamily:font, marginTop:4, opacity:gateLoading?0.7:1 }}>
+            {gateLoading ? "Please wait..." : gateMode === "signup" ? "Create Free Account 🧩" : "Sign In →"}
           </button>
         </form>
         {gateMode === "signup" && (
