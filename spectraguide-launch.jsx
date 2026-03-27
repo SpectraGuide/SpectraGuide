@@ -2106,9 +2106,11 @@ export default function App() {
     setGateError("");
     setGateLoading(true);
     const emailVal = e.target.querySelector('input[type="email"]').value;
-    const passwords = e.target.querySelectorAll('input[type="password"]');
-    const passwordVal = passwords[0]?.value || "";
-    const nameVal = e.target.querySelector('input[type="text"]')?.value || "";
+    // Get password by ID first, fall back to type selector
+    const pwInput = document.getElementById('pwInput') || e.target.querySelector('input[type="password"]') || e.target.querySelector('input[id="pwInput"]');
+    const passwordVal = pwInput?.value || "";
+    const passwords = e.target.querySelectorAll('input[type="password"], input[type="text"][id="pwInput"]');
+    const nameVal = e.target.querySelector('input[type="text"]:not([id="pwInput"])')?.value || "";
 
     if (!emailVal.includes("@")) { setGateError("Please enter a valid email address."); setGateLoading(false); return; }
     if (!passwordVal || passwordVal.length < 6) { setGateError("Password must be at least 6 characters."); setGateLoading(false); return; }
