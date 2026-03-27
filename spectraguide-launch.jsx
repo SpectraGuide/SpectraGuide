@@ -279,10 +279,18 @@ function HomePage({ setActive, waitlist, setWaitlist, t }) {
   const w = useWindowWidth();
   const mobile = w < 768;
 
-  function joinWaitlist() {
+  async function joinWaitlist() {
     if (!email.includes("@")) return;
     setWaitlist([...waitlist, { email, date:new Date().toLocaleDateString() }]);
     setSubmitted(true);
+    // Send welcome email
+    try {
+      await fetch("/api/welcome", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
+    } catch(e) { console.error("Welcome email error:", e); }
   }
 
   const features = [
