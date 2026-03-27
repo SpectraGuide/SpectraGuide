@@ -85,10 +85,18 @@ export default async function handler(req, res) {
         isAdmin: clean(email.toLowerCase()) === 'spectraguide@gmail.com'
       };
       await redisSet(`user:${user.email}`, user);
-      fetch('https://spectraguide.org/api/notify', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'signup', name, email, plan: 'free' })
-      }).catch(() => {});
+      try {
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from: 'SpectraGuide <hello@spectraguide.org>',
+            to: ['spectraguide@gmail.com'],
+            subject: `🧩 New SpectraGuide Signup — ${name}`,
+            text: `New signup!\n\nName: ${name}\nEmail: ${email}\nTime: ${new Date().toLocaleString()}`
+          })
+        });
+      } catch(emailErr) { console.error('Email error:', emailErr.message); }
       return res.status(200).json({ success: true, user: { email: user.email, name: user.name, plan: user.plan, isAdmin: user.isAdmin } });
 
     } else if (action === 'login') {
