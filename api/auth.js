@@ -19,21 +19,17 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Database not configured' });
   }
 
-  // Fully unwrap nested JSON - keeps parsing until we get a plain object
+  // Deeply unwrap nested JSON until we get a plain object
   function deepParse(val) {
     if (!val) return null;
-    if (typeof val === 'object' && val !== null) {
-      // If it has a nested 'value' key, unwrap it
-      if (val.value !== undefined) return deepParse(val.value);
-      return val;
-    }
     if (typeof val === 'string') {
-      try {
-        const parsed = JSON.parse(val);
-        return deepParse(parsed);
-      } catch {
-        return val;
-      }
+      try { return deepParse(JSON.parse(val)); } catch { return val; }
+    }
+    if (typeof val === 'object') {
+      // Unwrap {value: ...} wrapper
+      if (val.value !== undefined && Object.keys(val).length === 1) return deepParse(val.value);
+      if (val.value !== undefined && val.email === undefined) return deepParse(val.value);
+      return val;
     }
     return val;
   }
@@ -47,12 +43,11 @@ export default async function handler(req, res) {
     return deepParse(data.result);
   }
 
+  // Store as plain JSON string - NO wrapper object
   async function redisSet(key, value) {
-    // Store as clean JSON string - no nesting!
-    const r = await fetch(`${REDIS_URL}/set/${encodeURIComponent(key)}`, {
+    const r = await fetch(`${REDIS_URL}/set/${encodeURIComponent(key)}/${encodeURIComponent(JSON.stringify(value))}`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${REDIS_TOKEN}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ value: JSON.stringify(value) })
+      headers: { Authorization: `Bearer ${REDIS_TOKEN}` }
     });
     return r.ok;
   }
@@ -133,6 +128,7 @@ export default async function handler(req, res) {
       const resetData = await redisGet(`reset:${token}`);
       if (!resetData) return res.status(400).json({ error: 'Reset link expired. Please request a new one.' });
       const resetEmail = typeof resetData === 'string' ? resetData : resetData.email;
+      if (!resetEmail) return res.status(400).json({ error: 'Invalid reset token.' });
       const user = await redisGet(`user:${resetEmail}`);
       if (!user || !user.email) {
         const newUser = { email: resetEmail, name: resetEmail.split('@')[0], password, plan: 'free', created: new Date().toISOString(), isAdmin: resetEmail === 'spectraguide@gmail.com' };
