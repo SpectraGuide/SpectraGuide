@@ -85,7 +85,7 @@ export default async function handler(req, res) {
         isAdmin: clean(email.toLowerCase()) === 'spectraguide@gmail.com'
       };
       await redisSet(`user:${user.email}`, user);
-      fetch('/api/notify', {
+      fetch('https://spectraguide.org/api/notify', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: 'signup', name, email, plan: 'free' })
       }).catch(() => {});
