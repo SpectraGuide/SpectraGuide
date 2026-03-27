@@ -129,7 +129,8 @@ export default async function handler(req, res) {
 
     } else if (action === 'resetPassword') {
       if (!token || !password) return res.status(400).json({ error: 'Missing fields' });
-      const resetData = await redisGet(`reset:${token}`);
+      const rawResetData = await redisGet(`reset:${token}`);
+      const resetData = typeof rawResetData === 'string' ? { email: rawResetData } : rawResetData;
       console.log('Reset token lookup:', token, 'found:', !!resetData);
       if (!resetData) return res.status(400).json({ error: 'Reset link expired. Please request a new one.' });
       console.log('Reset email:', resetData.email);
@@ -139,7 +140,7 @@ export default async function handler(req, res) {
         // Create account if it doesn't exist yet (for Stripe customers)
         const newUser = {
           email: resetData.email,
-          name: resetData.email.split('@')[0],
+          name: (resetData.email || '').split('@')[0] || 'User',
           password: clean(password),
           plan: 'free',
           created: new Date().toISOString(),
