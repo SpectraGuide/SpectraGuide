@@ -33,10 +33,11 @@ export default async function handler(req, res) {
   }
 
   async function redisSetEx(key, value, seconds) {
-    await fetch(`${REDIS_URL}/setex/${encodeURIComponent(key)}/${seconds}`, {
+    // Use SET with EX option for Upstash REST API
+    await fetch(`${REDIS_URL}/set/${encodeURIComponent(key)}`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${REDIS_TOKEN}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ value: JSON.stringify(value) })
+      body: JSON.stringify({ value: JSON.stringify(value), ex: seconds })
     });
   }
 
@@ -85,6 +86,7 @@ export default async function handler(req, res) {
         isAdmin: clean(email.toLowerCase()) === 'spectraguide@gmail.com'
       };
       await redisSet(`user:${user.email}`, user);
+      // Send notification email directly
       try {
         await fetch('https://api.resend.com/emails', {
           method: 'POST',
@@ -93,7 +95,7 @@ export default async function handler(req, res) {
             from: 'SpectraGuide <hello@spectraguide.org>',
             to: ['spectraguide@gmail.com'],
             subject: `🧩 New SpectraGuide Signup — ${name}`,
-            text: `New signup!\n\nName: ${name}\nEmail: ${email}\nTime: ${new Date().toLocaleString()}`
+            text: `New signup!\n\nName: ${name}\nEmail: ${email}\nPlan: free\nTime: ${new Date().toLocaleString()}`
           })
         });
       } catch(emailErr) { console.error('Email error:', emailErr.message); }
@@ -128,9 +130,25 @@ export default async function handler(req, res) {
     } else if (action === 'resetPassword') {
       if (!token || !password) return res.status(400).json({ error: 'Missing fields' });
       const resetData = await redisGet(`reset:${token}`);
+      console.log('Reset token lookup:', token, 'found:', !!resetData);
       if (!resetData) return res.status(400).json({ error: 'Reset link expired. Please request a new one.' });
+      console.log('Reset email:', resetData.email);
       const user = await redisGet(`user:${resetData.email}`);
-      if (!user) return res.status(400).json({ error: 'User not found' });
+      console.log('User found:', !!user);
+      if (!user) {
+        // Create account if it doesn't exist yet (for Stripe customers)
+        const newUser = {
+          email: resetData.email,
+          name: resetData.email.split('@')[0],
+          password: clean(password),
+          plan: 'free',
+          created: new Date().toISOString(),
+          isAdmin: resetData.email === 'spectraguide@gmail.com'
+        };
+        await redisSet(`user:${resetData.email}`, newUser);
+        await redisDel(`reset:${token}`);
+        return res.status(200).json({ success: true, user: { email: newUser.email, name: newUser.name, plan: newUser.plan, isAdmin: newUser.isAdmin } });
+      }
       user.password = clean(password);
       await redisSet(`user:${resetData.email}`, user);
       await redisDel(`reset:${token}`);
