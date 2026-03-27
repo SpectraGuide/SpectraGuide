@@ -12,9 +12,12 @@ const serif = "'Playfair Display', Georgia, serif";
 const MODEL = "claude-sonnet-4-20250514";
 
 const STRIPE_PRICES = {
-  family:       "price_1TCPTO8iP7CLHxH9huST68Ho",
-  professional: "price_1TCPU88iP7CLHxH95DOnytak",
-  district:     "price_1TCPUT8iP7CLHxH9plA1BZWE",
+  family_monthly:       "price_1TCPTO8iP7CLHxH9huST68Ho",
+  professional_monthly: "price_1TCPU88iP7CLHxH95DOnytak",
+  district_monthly:     "price_1TCPUT8iP7CLHxH9plA1BZWE",
+  family_annual:        "price_1TFQ5t8iP7CLHxH9E7dzPVWl",
+  professional_annual:  "price_1TFQ8C8iP7CLHxH9epZLRSv5",
+  district_annual:      "price_1TFQ8d8iP7CLHxH9aUJvpUF3",
 };
 
 async function startCheckout(priceId) {
@@ -1180,8 +1183,9 @@ function PricingPage({ setActive, lang, t }) {
                   {plan.features.map((f,i) => <div key={i} style={{ display:"flex", gap:7, marginBottom:7 }}><span style={{ color:plan.color, fontSize:13 }}>✓</span><span style={{ fontSize:12.5, color:C.mid }}>{f}</span></div>)}
                 </div>
                 <button onClick={()=>{
-              if (plan.price === "Free") { setActive("Dashboard"); return; }
-              const key = plan.name.toLowerCase().replace(" plan","").replace("family","family").replace("professional","professional").replace("district","district");
+              if (plan.price.monthly === 0) { setActive("Dashboard"); return; }
+              const name = plan.name.toLowerCase();
+              const key = `${name}_${billing}`;
               const priceId = STRIPE_PRICES[key];
               if (priceId) startCheckout(priceId);
               else setActive("Dashboard");
