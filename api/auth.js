@@ -5,11 +5,19 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
   const { action, email, password, name } = req.body;
-  const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL;
-  const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
+  
+  // Try both possible variable name formats
+  const REDIS_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+  const REDIS_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+
+  console.log('REDIS_URL exists:', !!REDIS_URL);
+  console.log('REDIS_TOKEN exists:', !!REDIS_TOKEN);
 
   if (!REDIS_URL || !REDIS_TOKEN) {
-    return res.status(500).json({ error: 'Database not configured' });
+    return res.status(500).json({ 
+      error: 'Database not configured',
+      available: Object.keys(process.env).filter(k => k.includes('KV') || k.includes('REDIS') || k.includes('UPSTASH'))
+    });
   }
 
   async function redisGet(key) {
