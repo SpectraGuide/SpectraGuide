@@ -1989,11 +1989,23 @@ export default function App() {
   const [gateMode, setGateMode] = useState("signup"); // "signup", "login", "forgot", "resetPassword", "resetSent"
   const [resetToken, setResetToken] = useState("");
 
+  // Check for password reset token in URL on first load
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const resetToken = params.get('reset');
+    if (resetToken) {
+      setResetToken(resetToken);
+      setGateMode('resetPassword');
+      setGated(true);
+      // Clean URL
+      window.history.replaceState({}, document.title, '/');
+    }
+  }, []);
+
   useEffect(() => {
     if (!user) {
       setGated(true);
     } else if (user.email?.toLowerCase() === "spectraguide@gmail.com" && !user.isAdmin) {
-      // Always ensure admin flag is set for Tatyana's email
       setUser({ ...user, isAdmin: true });
     }
   }, [user]);
@@ -2123,7 +2135,7 @@ export default function App() {
 
         {gateMode === "forgot" && (
           <form onSubmit={handleForgotPassword} style={{ display:"flex", flexDirection:"column", gap:14 }}>
-            <input type="email" placeholder="Your email address" required style={{ padding:"13px 16px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:15, fontFamily:font, color:C.dark, outline:"none" }} />
+            <input type="email" placeholder="Your email address" required autoComplete="email" autoCorrect="off" autoCapitalize="none" style={{ padding:"13px 16px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:15, fontFamily:font, color:C.dark, outline:"none" }} />
             {gateError && <div style={{ background:"#FFF0F0", border:"1.5px solid #F4707A", borderRadius:8, padding:"10px 14px", fontSize:13, color:"#c0392b" }}>⚠️ {gateError}</div>}
             <button type="submit" disabled={gateLoading} style={{ padding:"14px", borderRadius:10, background:`linear-gradient(135deg,${C.teal},${C.lavender})`, border:"none", color:"white", fontSize:16, fontWeight:800, cursor:"pointer", fontFamily:font }}>
               {gateLoading ? "Sending..." : "Send Reset Email 📧"}
@@ -2166,10 +2178,10 @@ export default function App() {
           {gateMode === "signup" && (
             <input type="text" placeholder="Your full name" required style={{ padding:"13px 16px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:15, fontFamily:font, color:C.dark, outline:"none" }} />
           )}
-          <input type="email" placeholder="Your email address" required style={{ padding:"13px 16px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:15, fontFamily:font, color:C.dark, outline:"none" }} />
-          <input type="password" placeholder={gateMode === "signup" ? "Create a password (min 6 characters)" : "Your password"} required style={{ padding:"13px 16px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:15, fontFamily:font, color:C.dark, outline:"none" }} />
+          <input type="email" placeholder="Your email address" required autoComplete="email" autoCorrect="off" autoCapitalize="none" style={{ padding:"13px 16px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:15, fontFamily:font, color:C.dark, outline:"none" }} />
+          <input type="password" placeholder={gateMode === "signup" ? "Create a password (min 6 characters)" : "Your password"} required autoComplete="current-password" autoCorrect="off" autoCapitalize="none" spellCheck="false" style={{ padding:"13px 16px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:15, fontFamily:font, color:C.dark, outline:"none" }} />
           {gateMode === "signup" && (
-            <input type="password" placeholder="Confirm your password" required style={{ padding:"13px 16px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:15, fontFamily:font, color:C.dark, outline:"none" }} />
+            <input type="password" placeholder="Confirm your password" required autoComplete="new-password" autoCorrect="off" autoCapitalize="none" spellCheck="false" style={{ padding:"13px 16px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:15, fontFamily:font, color:C.dark, outline:"none" }} />
           )}
           {gateError && (
             <div style={{ background:"#FFF0F0", border:"1.5px solid #F4707A", borderRadius:8, padding:"10px 14px", fontSize:13, color:"#c0392b", textAlign:"left" }}>
