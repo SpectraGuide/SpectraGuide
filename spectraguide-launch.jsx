@@ -1849,7 +1849,7 @@ function PrivacyPage({ setActive }) {
           ["4. Data Sharing", "We do not sell, trade, or rent your personal information to third parties. We may share your information with trusted service providers who assist us in operating our platform, including Anthropic (AI processing), Vercel (hosting), and Stripe (payment processing). These providers are bound by confidentiality agreements."],
           ["5. Data Security", "We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. However, no method of transmission over the internet is 100% secure."],
           ["6. Children's Privacy", "SpectraGuide is not directed to children under 13. We do not knowingly collect personal information from children under 13. If you believe we have collected information from a child under 13, please contact us immediately."],
-          ["7. Your Rights", "You have the right to access, correct, or delete your personal information at any time. You may also opt out of marketing communications. To exercise these rights, contact us at spectraguide@gmail.com."],
+          ["7. Your Rights", "You have the right to access, correct, or delete your personal information at any time. You may also opt out of marketing communications. To exercise these rights, contact us at hello@spectraguide.org."],
           ["8. Contact Us", "If you have questions about this Privacy Policy, please contact us at hello@spectraguide.org or visit spectraguide.org."],
         ].map(([title, text]) => (
           <div key={title} style={{ marginBottom:28 }}>
@@ -1882,7 +1882,7 @@ function TermsPage({ setActive }) {
           ["7. Subscriptions and Payments", "Paid subscriptions are billed monthly or annually. You may cancel at any time. Refunds are handled on a case-by-case basis. Payment processing is handled securely by Stripe."],
           ["8. Limitation of Liability", "SpectraGuide shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of our service. Our total liability shall not exceed the amount you paid us in the past 12 months."],
           ["9. Changes to Terms", "We may update these terms from time to time. We will notify users of significant changes via email. Continued use of the service after changes constitutes acceptance of the new terms."],
-          ["10. Contact", "For questions about these terms, contact us at spectraguide@gmail.com."],
+          ["10. Contact", "For questions about these terms, contact us at hello@spectraguide.org."],
         ].map(([title, text]) => (
           <div key={title} style={{ marginBottom:28 }}>
             <h2 style={{ fontSize:17, fontWeight:800, color:C.dark, marginBottom:8 }}>{title}</h2>
@@ -1938,7 +1938,7 @@ function ContactPage({ setActive }) {
             <div style={{ fontSize:24, marginBottom:8 }}>📧</div>
             <div style={{ fontWeight:800, fontSize:16, color:C.dark, marginBottom:4 }}>Email Us</div>
             <p style={{ color:C.mid, fontSize:14, marginBottom:12 }}>For general questions, support, partnerships, and press inquiries.</p>
-            <a href="mailto:spectraguide@gmail.com" style={{ color:C.teal, fontWeight:700, fontSize:15, textDecoration:"none" }}>spectraguide@gmail.com</a>
+            <a href="mailto:hello@spectraguide.org" style={{ color:C.teal, fontWeight:700, fontSize:15, textDecoration:"none" }}>hello@spectraguide.org</a>
           </Card>
           <Card style={{ textAlign:"left" }}>
             <div style={{ fontSize:24, marginBottom:8 }}>💬</div>
@@ -1950,7 +1950,7 @@ function ContactPage({ setActive }) {
             <div style={{ fontSize:24, marginBottom:8 }}>🤝</div>
             <div style={{ fontWeight:800, fontSize:16, color:C.dark, marginBottom:4 }}>Partnerships & Media</div>
             <p style={{ color:C.mid, fontSize:14, marginBottom:12 }}>Interested in partnering with SpectraGuide or covering our story?</p>
-            <a href="mailto:spectraguide@gmail.com" style={{ color:C.teal, fontWeight:700, fontSize:15, textDecoration:"none" }}>spectraguide@gmail.com</a>
+            <a href="mailto:hello@spectraguide.org" style={{ color:C.teal, fontWeight:700, fontSize:15, textDecoration:"none" }}>hello@spectraguide.org</a>
           </Card>
         </div>
         <p style={{ color:C.soft, fontSize:13, marginTop:32 }}>Based in Kokomo, Indiana 💙 Serving families nationwide.</p>
