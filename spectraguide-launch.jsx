@@ -1966,7 +1966,8 @@ export default function App() {
     Terms:     <TermsPage setActive={setActive} />,
   };
 
-  const [gateMode, setGateMode] = useState("signup"); // "signup" or "login"
+  const [gateMode, setGateMode] = useState("signup"); // "signup", "login", "forgot", "resetPassword", "resetSent"
+  const [resetToken, setResetToken] = useState("");
 
   useEffect(() => {
     if (!user) {
@@ -1980,7 +1981,32 @@ export default function App() {
   const [gateError, setGateError] = useState("");
   const [gateLoading, setGateLoading] = useState(false);
 
-  async function handleGateSignup(e) {
+  async function handleForgotPassword(e) {
+    e.preventDefault();
+    setGateError("");
+    setGateLoading(true);
+    const emailVal = e.target.querySelector('input[type="email"]').value;
+    if (!emailVal.includes("@")) { setGateError("Please enter a valid email address."); setGateLoading(false); return; }
+    try {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "forgotPassword", email: emailVal })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setGateError("");
+        setGateMode("resetSent");
+      } else {
+        setGateError(data.error || "Something went wrong.");
+      }
+    } catch(err) {
+      setGateError("Connection error. Please try again.");
+    }
+    setGateLoading(false);
+  }
+
+    async function handleGateSignup(e) {
     e.preventDefault();
     setGateError("");
     setGateLoading(true);
@@ -2030,10 +2056,10 @@ export default function App() {
       <div style={{ background:"white", borderRadius:24, padding:"48px 40px", maxWidth:480, width:"100%", boxShadow:"0 32px 80px rgba(0,0,0,0.3)", position:"relative", zIndex:2, textAlign:"center" }}>
         <div style={{ width:64, height:64, borderRadius:18, background:`linear-gradient(135deg,${C.teal},${C.lavender})`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:30, margin:"0 auto 20px" }}>🧩</div>
         <h1 style={{ fontFamily:serif, fontSize:28, fontWeight:900, color:C.dark, margin:"0 0 8px", letterSpacing:"-0.5px" }}>
-          {gateMode === "signup" ? "Welcome to SpectraGuide" : "Welcome Back! 💙"}
+          {gateMode === "signup" ? "Welcome to SpectraGuide" : gateMode === "forgot" ? "Reset Password" : gateMode === "resetPassword" ? "Set New Password" : gateMode === "resetSent" ? "Email Sent! 📧" : "Welcome Back! 💙"}
         </h1>
         <p style={{ color:C.mid, fontSize:15, margin:"0 0 28px", lineHeight:1.6 }}>
-          {gateMode === "signup" ? "AI-powered autism advocacy for every family. Create your free account to get started." : "Sign in to access your SpectraGuide account."}
+          {gateMode === "signup" ? "AI-powered autism advocacy for every family. Create your free account to get started." : gateMode === "forgot" ? "Enter your email and we'll send you a reset link." : gateMode === "resetPassword" ? "Choose a new password for your account." : gateMode === "resetSent" ? "" : "Sign in to access your SpectraGuide account."}
         </p>
 
         {/* Toggle tabs */}
@@ -2046,7 +2072,48 @@ export default function App() {
           </button>
         </div>
 
-        <form onSubmit={handleGateSignup} style={{ display:"flex", flexDirection:"column", gap:14 }}>
+        {gateMode === "forgot" && (
+          <form onSubmit={handleForgotPassword} style={{ display:"flex", flexDirection:"column", gap:14 }}>
+            <input type="email" placeholder="Your email address" required style={{ padding:"13px 16px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:15, fontFamily:font, color:C.dark, outline:"none" }} />
+            {gateError && <div style={{ background:"#FFF0F0", border:"1.5px solid #F4707A", borderRadius:8, padding:"10px 14px", fontSize:13, color:"#c0392b" }}>⚠️ {gateError}</div>}
+            <button type="submit" disabled={gateLoading} style={{ padding:"14px", borderRadius:10, background:`linear-gradient(135deg,${C.teal},${C.lavender})`, border:"none", color:"white", fontSize:16, fontWeight:800, cursor:"pointer", fontFamily:font }}>
+              {gateLoading ? "Sending..." : "Send Reset Email 📧"}
+            </button>
+          </form>
+        )}
+        {gateMode === "resetSent" && (
+          <div style={{ textAlign:"center", padding:"20px 0" }}>
+            <div style={{ fontSize:48, marginBottom:12 }}>📧</div>
+            <div style={{ fontWeight:800, fontSize:17, color:C.dark, marginBottom:8 }}>Check your email!</div>
+            <p style={{ color:C.mid, fontSize:14, lineHeight:1.7 }}>We sent a password reset link to your email. Click the link to set a new password.</p>
+            <div style={{ marginTop:16 }}>
+              <span onClick={()=>setGateMode("login")} style={{ color:C.teal, cursor:"pointer", fontWeight:700, fontSize:13 }}>Back to Sign In →</span>
+            </div>
+          </div>
+        )}
+        {gateMode === "resetPassword" && (
+          <form onSubmit={async(e)=>{
+            e.preventDefault();
+            setGateLoading(true); setGateError("");
+            const pw = e.target.querySelectorAll('input[type="password"]');
+            if(pw[0].value !== pw[1].value){ setGateError("Passwords do not match."); setGateLoading(false); return; }
+            if(pw[0].value.length < 6){ setGateError("Password must be at least 6 characters."); setGateLoading(false); return; }
+            const res = await fetch("/api/auth",{ method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ action:"resetPassword", token:resetToken, password:pw[0].value }) });
+            const data = await res.json();
+            if(data.success){ setUser(data.user); setGated(false); }
+            else { setGateError(data.error || "Reset failed. Please try again."); }
+            setGateLoading(false);
+          }} style={{ display:"flex", flexDirection:"column", gap:14 }}>
+            <p style={{ color:C.mid, fontSize:14, margin:"0 0 4px", textAlign:"left" }}>Enter your new password:</p>
+            <input type="password" placeholder="New password (min 6 characters)" required style={{ padding:"13px 16px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:15, fontFamily:font, color:C.dark, outline:"none" }} />
+            <input type="password" placeholder="Confirm new password" required style={{ padding:"13px 16px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:15, fontFamily:font, color:C.dark, outline:"none" }} />
+            {gateError && <div style={{ background:"#FFF0F0", border:"1.5px solid #F4707A", borderRadius:8, padding:"10px 14px", fontSize:13, color:"#c0392b" }}>⚠️ {gateError}</div>}
+            <button type="submit" disabled={gateLoading} style={{ padding:"14px", borderRadius:10, background:`linear-gradient(135deg,${C.teal},${C.lavender})`, border:"none", color:"white", fontSize:16, fontWeight:800, cursor:"pointer", fontFamily:font }}>
+              {gateLoading ? "Saving..." : "Set New Password →"}
+            </button>
+          </form>
+        )}
+        {(gateMode === "signup" || gateMode === "login") && <form onSubmit={handleGateSignup} style={{ display:"flex", flexDirection:"column", gap:14 }}>
           {gateMode === "signup" && (
             <input type="text" placeholder="Your full name" required style={{ padding:"13px 16px", borderRadius:10, border:`1.5px solid ${C.border}`, fontSize:15, fontFamily:font, color:C.dark, outline:"none" }} />
           )}
@@ -2064,11 +2131,21 @@ export default function App() {
             {gateLoading ? "Please wait..." : gateMode === "signup" ? "Create Free Account 🧩" : "Sign In →"}
           </button>
         </form>
+        </form>}
         {gateMode === "signup" && (
           <p style={{ color:C.soft, fontSize:12, marginTop:16, lineHeight:1.6 }}>Free forever. No credit card required. By signing up you agree to our <span onClick={()=>{setGated(false);setActive("Privacy")}} style={{ color:C.teal, cursor:"pointer" }}>Privacy Policy</span> and <span onClick={()=>{setGated(false);setActive("Terms")}} style={{ color:C.teal, cursor:"pointer" }}>Terms of Service</span>.</p>
         )}
         {gateMode === "login" && (
-          <p style={{ color:C.soft, fontSize:12, marginTop:16 }}>Don't have an account? <span onClick={()=>setGateMode("signup")} style={{ color:C.teal, cursor:"pointer", fontWeight:700 }}>Sign up free →</span></p>
+          <p style={{ color:C.soft, fontSize:12, marginTop:16 }}>
+            <span onClick={()=>setGateMode("forgot")} style={{ color:C.teal, cursor:"pointer", fontWeight:700 }}>Forgot password?</span>
+            {" · "}
+            Don't have an account? <span onClick={()=>setGateMode("signup")} style={{ color:C.teal, cursor:"pointer", fontWeight:700 }}>Sign up free →</span>
+          </p>
+        )}
+        {gateMode === "forgot" && (
+          <p style={{ color:C.soft, fontSize:12, marginTop:16 }}>
+            Remember your password? <span onClick={()=>setGateMode("login")} style={{ color:C.teal, cursor:"pointer", fontWeight:700 }}>Sign in →</span>
+          </p>
         )}
       </div>
     </div>
