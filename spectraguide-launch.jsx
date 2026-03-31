@@ -9,7 +9,7 @@ const C = {
 };
 const font  = "'Segoe UI', system-ui, sans-serif";
 const serif = "'Playfair Display', Georgia, serif";
-const MODEL = "claude-sonnet-4-20250514";
+const MODEL = "claude-haiku-4-5-20251001";
 
 const STRIPE_PRICES = {
   family_monthly:       "price_1TCPTO8iP7CLHxH9huST68Ho",
@@ -451,7 +451,7 @@ Siempre reconoce las emociones primero. Explica el vocabulario técnico. Usa est
     const newMsgs = [...messages, { role:"user", content:msg }];
     setMessages(newMsgs); setLoading(true);
     try {
-      const history = newMsgs.slice(1);
+      const history = newMsgs.slice(1).slice(-6); // Only send last 6 messages to save costs
       const reply = await claudeChat(lang==="es"?SYSTEM_ES:SYSTEM_EN, msg, history.slice(0,-1), 1800);
       const updated = [...newMsgs, { role:"assistant", content:reply }];
       setMessages(updated);
@@ -468,7 +468,7 @@ Siempre reconoce las emociones primero. Explica el vocabulario técnico. Usa est
           <div>
             <div style={{ display:"flex", alignItems:"center", gap:7 }}>
               <div style={{ fontWeight:800, fontSize:15, color:C.dark }}>SpectraGuide Advocate</div>
-              <span style={{ background:`linear-gradient(135deg,${C.lavender},${C.teal})`, color:"white", fontSize:9, fontWeight:700, padding:"2px 8px", borderRadius:999 }}>OPUS</span>
+              <span style={{ background:`linear-gradient(135deg,${C.lavender},${C.teal})`, color:"white", fontSize:9, fontWeight:700, padding:"2px 8px", borderRadius:999 }}>AI</span>
               {lang==="es" && <span style={{ background:`${C.gold}22`, color:C.peach, fontSize:9, fontWeight:700, padding:"2px 8px", borderRadius:999, border:`1px solid ${C.gold}44` }}>ES</span>}
             </div>
             <div style={{ fontSize:11, color:C.teal, fontWeight:600 }}>● Online</div>
